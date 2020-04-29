@@ -31,7 +31,7 @@ import torch
 from transformers import *
 
 MODELS = { "bert": (BertModel,       BertTokenizer,       BertConfig)}
-model_name_or_path = <path_to_the_downloaded_pretrained_models>
+model_name_or_path = <path_to_the_downloaded_tod-bert>
 
 model_class, tokenizer_class, config_class = MODELS["bert"]
 tokenizer = tokenizer_class.from_pretrained(model_name_or_path)
