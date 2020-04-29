@@ -24,12 +24,8 @@ Please downloaded the pre-trained models from the following links.
 * [ToD-BERT-jnt](https://drive.google.com/file/d/17F-wS4PwR6iz-Ubj0TaNsxNyMscgO3VV/view?usp=sharing)
 
 ## Usage
-Please refer to the following guide how to use our pre-trained ToD-BERT models. Full training and evaluation code will be released soon.Our model is built on top of the [PyTorch](https://pytorch.org/) library and huggingface [Transformer](https://github.com/huggingface/transformers) library.
-```console
-❱❱❱ pip install transformers
-```
+Please refer to the following guide how to use our pre-trained ToD-BERT models. Full training and evaluation code will be released soon. Our model is built on top of the [PyTorch](https://pytorch.org/) library and huggingface [Transformer](https://github.com/huggingface/transformers) library. Let's do a very quick overview of the model architecture and code. Detailed examples for model architecturecan be found in the paper.
 
-Let's do a very quick overview of the model architecture and code. Detailed examples for model architecturecan be found in the paper.
 ```
 import torch
 from transformers import *
@@ -41,7 +37,7 @@ model_class, tokenizer_class, config_class = MODELS["bert"]
 tokenizer = tokenizer_class.from_pretrained(model_name_or_path)
 tod_bert = model_class.from_pretrained(model_name_or_path)
 
-# Encode text (Add special tokens takes care of adding [CLS], [SEP], <s>... tokens in the right way for each model.)
+# Encode text 
 input_text = "[CLS] [SYS] Hello, what can I help with you today? [USR] Find me a cheap restaurant nearby the north town."
 input_tokens = self.tokenizer.tokenize(input_text)
 story = torch.Tensor(self.tokenizer.convert_tokens_to_ids(input_tokens))
@@ -55,4 +51,6 @@ with torch.no_grad():
     hiddens = self.utterance_encoder(**input_context)[0] 
 ```
 
+## Report
+Feel free to create an issue or send email to the first author at cswu@salesforce.com
 
