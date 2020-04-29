@@ -20,8 +20,8 @@ If you use any source codes, pretrained models or datasets included in this repo
 
 ## Pretrained Models
 Please downloaded the pre-trained models from the following links.
-* [ToD-BERT-mlm](https://drive.google.com/file/d/1vxqTda4MIYb1VDIA4NOokq7uCM4MW_1J/view?usp=sharing)
-* [ToD-BERT-jnt](https://drive.google.com/file/d/17F-wS4PwR6iz-Ubj0TaNsxNyMscgO3VV/view?usp=sharing)
+* [ToD-BERT-mlm V1](https://drive.google.com/file/d/1vxqTda4MIYb1VDIA4NOokq7uCM4MW_1J/view?usp=sharing)
+* [ToD-BERT-jnt V1](https://drive.google.com/file/d/17F-wS4PwR6iz-Ubj0TaNsxNyMscgO3VV/view?usp=sharing)
 
 ## Usage
 Please refer to the following guide how to use our pre-trained ToD-BERT models. Full training and evaluation code will be released soon. Our model is built on top of the [PyTorch](https://pytorch.org/) library and huggingface [Transformer](https://github.com/huggingface/transformers) library. Let's do a very quick overview of the model architecture and code. Detailed examples for model architecturecan be found in the paper.
