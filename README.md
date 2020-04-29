@@ -39,8 +39,8 @@ tod_bert = model_class.from_pretrained(model_name_or_path)
 
 # Encode text 
 input_text = "[CLS] [SYS] Hello, what can I help with you today? [USR] Find me a cheap restaurant nearby the north town."
-input_tokens = self.tokenizer.tokenize(input_text)
-story = torch.Tensor(self.tokenizer.convert_tokens_to_ids(input_tokens))
+input_tokens = tokenizer.tokenize(input_text)
+story = torch.Tensor(tokenizer.convert_tokens_to_ids(input_tokens))
 
 if torch.cuda.is_available(): 
     tod_bert = tod_bert.cuda()
@@ -48,7 +48,7 @@ if torch.cuda.is_available():
 
 with torch.no_grad():
     input_context = {"input_ids": story, "attention_mask": (story > 0).long()}
-    hiddens = self.utterance_encoder(**input_context)[0] 
+    hiddens = tod_bert(**input_context)[0] 
 ```
 
 ## Report
