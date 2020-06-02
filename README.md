@@ -51,6 +51,25 @@ with torch.no_grad():
     hiddens = tod_bert(**input_context)[0] 
 ```
 
+## Results
+
+<p align="center">
+<img src="img/Intent.png" width="75%" />
+</p>
+
+<p align="center">
+<img src="img/DST.png" width="35%" />
+</p>
+
+<p align="center">
+<img src="img/DA.png" width="75%" />
+</p>
+
+<p align="center">
+<img src="img/RS.png" width="75%" />
+</p>
+
+
 ## Report
 Feel free to create an issue or send email to the first author at cswu@salesforce.com
 
