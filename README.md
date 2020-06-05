@@ -40,7 +40,10 @@ tod_bert = model_class.from_pretrained(model_name_or_path)
 # Encode text 
 input_text = "[CLS] [SYS] Hello, what can I help with you today? [USR] Find me a cheap restaurant nearby the north town."
 input_tokens = tokenizer.tokenize(input_text)
-story = torch.Tensor(tokenizer.convert_tokens_to_ids(input_tokens))
+story = torch.Tensor(tokenizer.convert_tokens_to_ids(input_tokens)).long()
+
+if len(story.size()) == 1: 
+    story = story.unsqueeze(0) # batch size dimension
 
 if torch.cuda.is_available(): 
     tod_bert = tod_bert.cuda()
