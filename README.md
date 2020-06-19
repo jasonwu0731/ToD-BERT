@@ -5,7 +5,7 @@ Authors: [Chien-Sheng Wu](https://jasonwu0731.github.io/), [Steven Hoi](http://m
 Paper: https://arxiv.org/abs/2004.06871
 
 ## Introduction
-The use of pre-trained language models has emerged as a promising direction for improving dialogue systems. However, the underlying difference of linguistic patterns between conversational data and general text makes the existing pre-trained language models not as effective as they have been shown to be. Recently, there are some pre-training approaches based on open-domain dialogues, leveraging large-scale social media data such as Twitter or Reddit. Pre-training for task-oriented dialogues, on the other hand, is rarely discussed because of the long-standing and crucial data scarcity problem. In this work, we combine nine English-based, human-human, multi-turn and publicly available task-oriented dialogue datasets to conduct language model and response selection pre-training. The experimental results show that our pre-trained task-oriented dialogue BERT (ToD-BERT) surpasses BERT and other strong baselines in four downstream task-oriented dialogue applications, including intention detection, dialogue state tracking, dialogue act prediction, and response selection. Moreover, in the simulated limited data experiments, we show that ToD-BERT has stronger few-shot capacity that can mitigate the data scarcity problem in task-oriented dialogues.
+The underlying difference of linguistic patterns between general text and task-oriented dialogue makes existing pre-trained language models less effective in practice. In this work, we unify nine human-human and multi-turn task-oriented dialogue datasets for language modeling. To better model dialogue behavior during pre-training, we incorporate user and system special tokens into the masked language modeling, and we add a contrastive objective function with a simulated response selection task. Our pre-trained task-oriented dialogue BERT (TOD-BERT) outperforms strong baselines like BERT in four downstream task-oriented dialogue applications, including intention detection, dialogue state tracking, dialogue act prediction, and response selection. We also show that TOD-BERT has stronger few-shot ability that can mitigate the data scarcity problem for task-oriented dialogue.
 
 ## Citation
 If you use any source codes, pretrained models or datasets included in this repo in your work, please cite the following paper. The bibtex is listed below:
@@ -23,7 +23,7 @@ Please downloaded the pre-trained models from the following links.
 * [ToD-BERT-mlm V1](https://drive.google.com/file/d/1vxqTda4MIYb1VDIA4NOokq7uCM4MW_1J/view?usp=sharing)
 * [ToD-BERT-jnt V1](https://drive.google.com/file/d/17F-wS4PwR6iz-Ubj0TaNsxNyMscgO3VV/view?usp=sharing)
 
-## Usage
+## Direct Usage
 Please refer to the following guide how to use our pre-trained ToD-BERT models. Full training and evaluation code will be released soon. Our model is built on top of the [PyTorch](https://pytorch.org/) library and huggingface [Transformer](https://github.com/huggingface/transformers) library. Let's do a very quick overview of the model architecture and code. Detailed examples for model architecturecan be found in the paper.
 
 ```
@@ -52,6 +52,56 @@ if torch.cuda.is_available():
 with torch.no_grad():
     input_context = {"input_ids": story, "attention_mask": (story > 0).long()}
     hiddens = tod_bert(**input_context)[0] 
+```
+
+## Training and Testing
+If you would like to train the model yourself, you can download those datasets yourself from each of their original papers or sources. You can also direct download a zip file [here](https://drive.google.com/file/d/1EnGX0UF4KW6rVBKMF3fL-9Q2ZyFKNOIy/view?usp=sharing).
+
+The repository is currently in this structure:
+```
+.
+└── image
+    └── ...
+└── models
+    └── multi_class_classifier.py
+    └── multi_label_classifier.py
+    └── BERT_DST_Picklist.py
+    └── dual_encoder_ranking.py
+└── utils.py
+    └── multiwoz
+        └── ...
+    └── metrics
+        └── ...
+    └── loss_function
+        └── ...
+    └── dataloader_nlu.py
+    └── dataloader_dst.py
+    └── dataloader_dm.py
+    └── dataloader_nlg.py
+    └── dataloader_usdl.py
+    └── ...
+└── README.md
+└── evaluation_pipeline.sh
+└── evaluation_ratio_pipeline.sh
+└── run_tod_lm_pretraining.sh
+└── main.py
+└── my_tod_pretraining.py
+```
+
+* Run Pretraining
+```console
+❱❱❱ ./run_tod_lm_pretraining.sh 0 bert bert-base-uncased save/pretrain/ToD-BERT-MLM --only_last_turn
+❱❱❱ ./run_tod_lm_pretraining.sh 0 bert bert-base-uncased save/pretrain/ToD-BERT-JNT --only_last_turn --add_rs_loss
+```
+
+* Run Fine-tuning
+```console
+❱❱❱ ./evaluation_pipeline.sh 0 bert bert-base-uncased save/BERT
+```
+
+* Run Fine-tuning (Few-Shot)
+```console
+❱❱❱ ./evaluation_ratio_pipeline.sh 0 bert bert-base-uncased save/BERT --nb_runs=3 
 ```
 
 ## Results
