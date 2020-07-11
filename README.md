@@ -20,13 +20,13 @@ If you use any source codes, pretrained models or datasets included in this repo
 
 
 ## Update
-
 * (2020.07.10) Loading model from [Huggingface](https://huggingface.co/) is now supported.
 * (2020.04.26) Pre-trained models are available.
 
 ## Pretrained Models
-
-You can easily load the pre-trained model using huggingface [Transformer](https://github.com/huggingface/transformers) library using the AutoModel function: 
+You can easily load the pre-trained model using huggingface [Transformer](https://github.com/huggingface/transformers) library using the AutoModel function. Several pre-trained versions are supported:
+* TODBERT/TOD-BERT-MLM-V1: TOD-BERT pre-trained only using the MLM objective
+* TODBERT/TOD-BERT-JNT-V1: TOD-BERT pre-trained using both the MLM and RCL objectives
 ```
 import torch
 from transformers import *
