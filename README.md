@@ -116,25 +116,6 @@ The repository is currently in this structure:
 ❱❱❱ ./evaluation_ratio_pipeline.sh 0 bert bert-base-uncased save/BERT --nb_runs=3 
 ```
 
-## Results
-
-<p align="center">
-<img src="img/Intent.png" width="75%" />
-</p>
-
-<p align="center">
-<img src="img/DST.png" width="35%" />
-</p>
-
-<p align="center">
-<img src="img/DA.png" width="75%" />
-</p>
-
-<p align="center">
-<img src="img/RS.png" width="75%" />
-</p>
-
-
 ## Report
 Feel free to create an issue or send email to the first author at cswu@salesforce.com
 
