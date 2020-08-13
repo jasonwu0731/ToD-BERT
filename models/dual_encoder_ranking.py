@@ -92,8 +92,8 @@ class dual_encoder_ranking(nn.Module):
             response_outputs.append(response_output.cpu())
         
         # evaluation for k-to-100
-        if (not self.training) and (batch_size < 100): 
-            response_outputs.append(self.final_response_output[:100-batch_size, :])
+        if (not self.training) and (batch_size < self.args["eval_batch_size"]): 
+            response_outputs.append(self.final_response_output[:self.args["eval_batch_size"]-batch_size, :])
         
         final_context_output = torch.cat(context_outputs, 0)
         final_response_output = torch.cat(response_outputs, 0)
