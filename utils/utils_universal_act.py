@@ -18,12 +18,12 @@ def read_langs_turn(file_name, max_line = None):
         cnt_lin = 1
         for dial_list in dials:
             dialog_history = []
-
+            
+            sys_first_flag = 1 if (dial_list[0]["speaker"]=="[SYS]") else 0
+            
             # Reading data
             for ti, turn in enumerate(dial_list):
-                
-                sys_first_flag = 1 if (ti==0 and turn["speaker"]=="[SYS]") else 0
-                
+
                 data_detail = get_input_example("turn")
                 data_detail["ID"] = turn["conv_id"]
                 data_detail["dialog_history"] = list(dialog_history)

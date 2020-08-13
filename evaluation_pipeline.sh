@@ -9,41 +9,41 @@ add3=$7
 # ./evaluation_pipeline.sh 0 bert bert-base-uncased save/BERT
 
 # Intent
-# for bsz in 8 16 32
-# do
-#     CUDA_VISIBLE_DEVICES=$gpu python main.py \
-#     --my_model=multi_class_classifier \
-#     --dataset='["oos_intent"]' \
-#     --task_name="intent" \
-#     --earlystop="acc" \
-#     --output_dir=${output_dir}/Intent/OOS/BSZ${bsz} \
-#     --do_train \
-#     --task=nlu \
-#     --example_type=turn \
-#     --model_type=${model} \
-#     --model_name_or_path=${bert_dir} \
-#     --batch_size=${bsz} \
-#     --usr_token=[USR] --sys_token=[SYS] \
-#     --epoch=50 --eval_by_step=500 --warmup_steps=250 \
-#     $add1 $add2 $add3
-# done
+for bsz in 8 16 32
+do
+    CUDA_VISIBLE_DEVICES=$gpu python main.py \
+    --my_model=multi_class_classifier \
+    --dataset='["oos_intent"]' \
+    --task_name="intent" \
+    --earlystop="acc" \
+    --output_dir=${output_dir}/Intent/OOS/BSZ${bsz} \
+    --do_train \
+    --task=nlu \
+    --example_type=turn \
+    --model_type=${model} \
+    --model_name_or_path=${bert_dir} \
+    --batch_size=${bsz} \
+    --usr_token=[USR] --sys_token=[SYS] \
+    --epoch=50 --eval_by_step=500 --warmup_steps=250 \
+    $add1 $add2 $add3
+done
 
 # DST
-# CUDA_VISIBLE_DEVICES=$gpu python main.py \
-#     --my_model=BeliefTracker \
-#     --model_type=${model} \
-#     --dataset='["multiwoz"]' \
-#     --task_name="dst" \
-#     --earlystop="joint_acc" \
-#     --output_dir=${output_dir}/DST/MWOZ \
-#     --do_train \
-#     --task=dst \
-#     --example_type=turn \
-#     --model_name_or_path=${bert_dir} \
-#     --batch_size=6 --eval_batch_size=6 \
-#     --usr_token=[USR] --sys_token=[SYS] \
-#     --eval_by_step=4000 \
-#     $add1 $add2 $add3
+CUDA_VISIBLE_DEVICES=$gpu python main.py \
+    --my_model=BeliefTracker \
+    --model_type=${model} \
+    --dataset='["multiwoz"]' \
+    --task_name="dst" \
+    --earlystop="joint_acc" \
+    --output_dir=${output_dir}/DST/MWOZ \
+    --do_train \
+    --task=dst \
+    --example_type=turn \
+    --model_name_or_path=${bert_dir} \
+    --batch_size=6 --eval_batch_size=6 \
+    --usr_token=[USR] --sys_token=[SYS] \
+    --eval_by_step=4000 \
+    $add1 $add2 $add3
 
 # DA
 CUDA_VISIBLE_DEVICES=$gpu python main.py \
