@@ -1,0 +1,12 @@
+torch==1.6.0a0+9907a3e
+six==1.15.0
+numpy==1.18.1
+tqdm==4.31.1
+transformers==3.0.2
+faiss==1.4.0
+nltk==3.5
+apex==0.1
+ptvsd==4.3.2
+scikit_learn==0.23.2
+simplejson==3.17.2
+tensorboardX==2.1
