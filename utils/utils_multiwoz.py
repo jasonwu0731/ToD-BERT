@@ -48,7 +48,7 @@ def read_langs_turn(args, file_name, ontology, dialog_act, max_line = None, doma
                     if slot in belief_dict.keys(): 
                         
                         # update ontology
-                        if "the {}".format(belief_dict[slot]) in ontology[slot].keys(): 
+                        if args["ontology_version"] != "" and "the {}".format(belief_dict[slot]) in ontology[slot].keys(): 
                             belief_dict[slot] = "the {}".format(belief_dict[slot])
                         
                         if belief_dict[slot] not in ontology[slot].keys() and update_ont_flag:
