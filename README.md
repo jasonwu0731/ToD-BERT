@@ -1,11 +1,13 @@
-# ToD-BERT: Pre-trained Natural Language Understanding for Task-Oriented Dialogues 
+# TOD-BERT: Pre-trained Natural Language Understanding for Task-Oriented Dialogues 
 
-Authors: [Chien-Sheng Wu](https://jasonwu0731.github.io/), [Steven Hoi](http://mysmu.edu.sg/faculty/chhoi/), [Richard Socher](https://www.socher.org/) and [Caiming Xiong](http://cmxiong.com/).
+Authors: [Chien-Sheng Wu](https://jasonwu0731.github.io/), [Steven Hoi](http://mysmu.edu.sg/faculty/chhoi/), [Richard Socher](https://www.socher.org/) and [Caiming Xiong](http://cmxiong.com/). 
 
-Paper: https://arxiv.org/abs/2004.06871
+EMNLP 2020. Paper: https://arxiv.org/abs/2004.06871
+
 
 ## Introduction
-The underlying difference of linguistic patterns between general text and task-oriented dialogue makes existing pre-trained language models less effective in practice. In this work, we unify nine human-human and multi-turn task-oriented dialogue datasets for language modeling. To better model dialogue behavior during pre-training, we incorporate user and system special tokens into the masked language modeling, and we add a contrastive objective function with a simulated response selection task. Our pre-trained task-oriented dialogue BERT (TOD-BERT) outperforms strong baselines like BERT in four downstream task-oriented dialogue applications, including intention detection, dialogue state tracking, dialogue act prediction, and response selection. We also show that TOD-BERT has stronger few-shot ability that can mitigate the data scarcity problem for task-oriented dialogue.
+The underlying difference of linguistic patterns between general text and task-oriented dialogue makes existing pre-trained language models less useful in practice. In this work, we unify nine human-human and multi-turn task-oriented dialogue datasets for language modeling. To better model dialogue behavior during pre-training, we incorporate user and system tokens into the masked language modeling. We propose a contrastive objective function to simulate the response selection task. Our pre-trained task-oriented dialogue BERT (TOD-BERT) outperforms strong baselines like BERT on four downstream task-oriented dialogue applications, including intention recognition, dialogue state tracking, dialogue act prediction, and response selection. We also show that TOD-BERT has a stronger few-shot ability that can mitigate the data scarcity problem for task-oriented dialogue.
+
 
 ## Citation
 If you use any source codes, pretrained models or datasets included in this repo in your work, please cite the following paper. The bibtex is listed below:
@@ -20,11 +22,13 @@ If you use any source codes, pretrained models or datasets included in this repo
 
 
 ## Update
+* (2020.10.01) More training and inference information added. Release TOD-DistilBERT.
 * (2020.07.10) Loading model from [Huggingface](https://huggingface.co/) is now supported.
 * (2020.04.26) Pre-trained models are available.
 
+
 ## Pretrained Models
-You can easily load the pre-trained model using huggingface [Transformer](https://github.com/huggingface/transformers) library using the AutoModel function. Several pre-trained versions are supported:
+You can easily load the pre-trained model using huggingface [Transformers](https://github.com/huggingface/transformers) library using the AutoModel function. Several pre-trained versions are supported:
 * TODBERT/TOD-BERT-MLM-V1: TOD-BERT pre-trained only using the MLM objective
 * TODBERT/TOD-BERT-JNT-V1: TOD-BERT pre-trained using both the MLM and RCL objectives
 * TODBERT/TOD-DistilBERT-JNT-V1: TOD-DistilBERT pre-trained using both the MLM and RCL objectives
@@ -45,9 +49,8 @@ tokenizer = tokenizer_class.from_pretrained(model_name_or_path)
 tod_bert = model_class.from_pretrained(model_name_or_path)
 ```
 
-
 ## Direct Usage
-Please refer to the following guide how to use our pre-trained ToD-BERT models. Full training and evaluation code will be released soon. Our model is built on top of the [PyTorch](https://pytorch.org/) library and huggingface [Transformer](https://github.com/huggingface/transformers) library. Let's do a very quick overview of the model architecture and code. Detailed examples for model architecturecan be found in the paper.
+Please refer to the following guide how to use our pre-trained ToD-BERT models. Our model is built on top of the [PyTorch](https://pytorch.org/) library and huggingface [Transformers](https://github.com/huggingface/transformers) library. Let's do a very quick overview of the model architecture and code. Detailed examples for model architecturecan be found in the paper.
 
 ```
 # Encode text 

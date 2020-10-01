@@ -22,7 +22,6 @@ class multi_class_classifier(nn.Module):
         self.rnn_num_layers = args["num_rnn_layers"]
         self.num_labels = args["num_labels"]
         self.xeloss = nn.CrossEntropyLoss()
-        #self.sigmoid = nn.Sigmoid()
         self.n_gpu = args["n_gpu"]
 
         ### Utterance Encoder

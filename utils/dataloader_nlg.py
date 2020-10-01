@@ -67,6 +67,10 @@ class Dataset_nlg(torch.utils.data.Dataset):
             "utterance_delex":utterance_delex,
             "utterance_plain_delex":utterance_plain_delex}
         
+        '''
+        Add additional negative samples per training samples to make the selection harder, 
+        we found that by adding this we can slightly improve the response selection performance
+        '''
         if self.args["nb_neg_sample_rs"] != 0 and self.mode == "train":
 
             if self.args["sample_negative_by_kmeans"]:
@@ -141,10 +145,7 @@ def collate_fn_nlg_turn(data):
             for ri, neg_resp in enumerate(arr):
                 if neg_resp not in item_info["response_plain"]:
                     item_info["response"] += [item_info['neg_resp_idx_arr'][bi][ri]]
-                
-        #neg_resp_idx_arr = [ng for ng in neg_resp_idx_arr if ng not in item_info["response"]] 
-        #item_info["response"] += neg_resp_idx_arr
-        
+
     # merge sequences    
     context, context_lengths = merge(item_info['context'])
     context_delex, context_delex_lengths = merge(item_info['context_delex'])

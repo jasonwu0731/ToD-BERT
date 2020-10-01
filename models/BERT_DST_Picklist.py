@@ -189,77 +189,28 @@ class BeliefTracker(nn.Module):
         loss = 0
         pred_slot = []
         
-        if self.args["oracle_domain"]:
-            
-            for slot_id in range(self.num_slots):
-                pred_slot_local = []
-                for bsz_i in range(batch_size):
-                    hidden_bsz = hidden[bsz_i, :, :]
-                    
-                    if slot_id in data["triggered_ds_idx"][bsz_i]:
+        for slot_id in range(self.num_slots): ## note: target_slots are successive
+            # loss calculation
+            hid_label = self.value_lookup[slot_id].weight # v * d
+            num_slot_labels = hid_label.size(0)
 
-                        temp = [i for i, idx in enumerate(data["triggered_ds_idx"][bsz_i]) if idx == slot_id]
-                        assert len(temp) == 1
-                        ds_pos = data["triggered_ds_pos"][bsz_i][temp[0]]
+            _hidden = _gelu(self.project_W_1[slot_id](hidden_rep))
+            _hidden = torch.cat([hid_label.unsqueeze(0).repeat(batch_size, 1, 1), _hidden.unsqueeze(1).repeat(1, num_slot_labels, 1)], dim=2)
+            _hidden = _gelu(self.project_W_2[slot_id](_hidden))
+            _hidden = self.project_W_3[slot_id](_hidden)
+            _dist = _hidden.squeeze(2) # b * 1 * num_slot_labels
 
-                        hid_label = self.value_lookup[slot_id].weight # v * d
-                        hidden_ds = hidden_bsz[ds_pos, :].unsqueeze(1) # d * 1
-                        hidden_ds = torch.cat([hidden_ds, hidden_bsz[0, :].unsqueeze(1)], 0) # 2d * 1
-                        hidden_ds = self.project_W_2[0](hidden_ds.transpose(1, 0)).transpose(1, 0) # d * 1
+            _, pred = torch.max(_dist, -1)
+            pred_slot.append(pred.unsqueeze(1))
+            #output.append(_dist)
 
-                        _dist = torch.mm(hid_label, hidden_ds).transpose(1, 0) # 1 * v, 51.6%
-                        
-                        _, pred = torch.max(_dist, -1)
-                        pred_item = pred.item()
+            if labels is not None:
+                _loss = self.nll(_dist, labels[:, slot_id])
+                #loss_slot.append(_loss.item())
+                loss += _loss
 
-                        if labels is not None:
-                            
-                            if (self.args["gate_supervision_for_dst"] and labels[bsz_i, slot_id] != 0) or\
-                               (not self.args["gate_supervision_for_dst"]):
-                                _loss = self.nll(_dist, labels[bsz_i, slot_id].unsqueeze(0))
-                                loss += _loss
-                        
-                        if self.args["gate_supervision_for_dst"]:
-                            _dist_gate = self.gate_classifier(hidden_ds.transpose(1, 0))
-                            _loss_gate = self.nll(_dist_gate, data["slot_gate"][bsz_i, slot_id].unsqueeze(0))
-                            loss += _loss_gate
-                            
-                            if torch.max(_dist_gate, -1)[1].item() == 0:
-                                pred_item = 0
-                            
-                        pred_slot_local.append(pred_item)
-                    else:
-                        #print("slot_id Not Found")
-                        pred_slot_local.append(0)
-                
-                pred_slot.append(torch.tensor(pred_slot_local).unsqueeze(1))
-            
-            predictions = torch.cat(pred_slot, 1).numpy()
-            labels = labels.detach().cpu().numpy()
-            
-        else:
-            for slot_id in range(self.num_slots): ## note: target_slots are successive
-                # loss calculation
-                hid_label = self.value_lookup[slot_id].weight # v * d
-                num_slot_labels = hid_label.size(0)
-
-                _hidden = _gelu(self.project_W_1[slot_id](hidden_rep))
-                _hidden = torch.cat([hid_label.unsqueeze(0).repeat(batch_size, 1, 1), _hidden.unsqueeze(1).repeat(1, num_slot_labels, 1)], dim=2)
-                _hidden = _gelu(self.project_W_2[slot_id](_hidden))
-                _hidden = self.project_W_3[slot_id](_hidden)
-                _dist = _hidden.squeeze(2) # b * 1 * num_slot_labels
-
-                _, pred = torch.max(_dist, -1)
-                pred_slot.append(pred.unsqueeze(1))
-                #output.append(_dist)
-
-                if labels is not None:
-                    _loss = self.nll(_dist, labels[:, slot_id])
-                    #loss_slot.append(_loss.item())
-                    loss += _loss
-            
-            predictions = torch.cat(pred_slot, 1).detach().cpu().numpy()
-            labels = labels.detach().cpu().numpy()
+        predictions = torch.cat(pred_slot, 1).detach().cpu().numpy()
+        labels = labels.detach().cpu().numpy()
 
         if self.training: 
             self.loss_grad = loss

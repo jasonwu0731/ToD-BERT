@@ -38,7 +38,6 @@ MODELS = {"bert": (BertModel,       BertTokenizer,       BertConfig),
           "distilbert": (DistilBertModel, DistilBertTokenizer, DistilBertConfig),
           "electra": (ElectraModel, ElectraTokenizer, ElectraConfig)}
 
-
 ## Fix torch random seed
 if args["fix_rand_seed"]: 
     torch.manual_seed(args["rand_seed"])
@@ -232,11 +231,13 @@ else:
             model.load_state_dict(torch.load(args["load_path"]))
         else:
             model.load_state_dict(torch.load(args["load_path"], lambda storage, loc: storage))
+    else:
+        print("[WARNING] No trained model is loaded...")
+    
     if torch.cuda.is_available():
         model = model.cuda()
     
     print("[Info] Start Evaluation on dev and test set...")
-    #if MY_MODEL:
     dev_loader = get_loader(args, "dev"  , tokenizer, datasets, unified_meta)
     tst_loader = get_loader(args, "test" , tokenizer, datasets, unified_meta, shuffle=args["task_name"]=="rs")
     model.eval()
@@ -244,7 +245,7 @@ else:
     for d_eval in ["tst"]: #["dev", "tst"]:
         f_w = open(os.path.join(args["output_dir"], "{}_results.txt".format(d_eval)), "w")
 
-        # Start evaluating on the test set
+        ## Start evaluating on the test set
         test_loss = 0
         preds, labels = [], []
         pbar = tqdm(locals()["{}_loader".format(d_eval)])
@@ -254,7 +255,6 @@ else:
             test_loss += outputs["loss"]
             preds += [item for item in outputs["pred"]]
             labels += [item for item in outputs["label"]] 
-            #break
 
         test_loss = test_loss / len(tst_loader)
         results = model.evaluation(preds, labels)

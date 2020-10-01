@@ -3,7 +3,6 @@ six==1.15.0
 numpy==1.18.1
 tqdm==4.31.1
 transformers==3.0.2
-faiss==1.4.0
 nltk==3.5
 apex==0.1
 ptvsd==4.3.2

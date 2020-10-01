@@ -22,6 +22,7 @@ def get_loader(args, mode, tokenizer, datasets, unified_meta, shuffle=False):
         print("[Info] Remove turns with empty system response...")
         combined_ds = [d for d in combined_ds if d["turn_sys"]!=""]
     
+    ## Ignore the first system utterance for response selection task
     if (args["task_name"] == "rs"):
         print("[Info] Remove turn=0 system response...")
         combined_ds = [d for d in combined_ds if d["turn_id"]!=0]

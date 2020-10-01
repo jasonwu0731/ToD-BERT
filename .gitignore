@@ -1,2 +1,4 @@
 *pyc
 data/
+*.ipynb_checkpoints
+runs/
