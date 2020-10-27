@@ -445,8 +445,8 @@ def train(args, trn_loader, dev_loader, model, tokenizer, cand_uttr_sys_dict, ot
                 ## Calculate RCL loss
                 scores = torch.matmul(hid_cont, hid_resp.transpose(1, 0))
                 loss_rs = xeloss(scores, resp_label)
-                loss_rs = loss_rs.item()
                 loss += loss_rs
+                loss_rs = loss_rs.item()
             
             ## with only MLM loss
             else: 
