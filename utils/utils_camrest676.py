@@ -7,6 +7,13 @@ from .utils_function import get_input_example
 
 
 def read_langs_turn(args, file_name, max_line = None):
+    """
+    Read language history file.
+
+    Args:
+        file_name: (str): write your description
+        max_line: (int): write your description
+    """
     print(("Reading from {} for read_langs_turn".format(file_name)))
     
     data = []
@@ -48,6 +55,16 @@ def read_langs_turn(args, file_name, max_line = None):
 
 
 def read_langs_dial(file_name, ontology, dialog_act, max_line = None, domain_act_flag=False):
+    """
+    Reads the language file
+
+    Args:
+        file_name: (str): write your description
+        ontology: (float): write your description
+        dialog_act: (str): write your description
+        max_line: (int): write your description
+        domain_act_flag: (todo): write your description
+    """
     print(("Reading from {} for read_langs_dial".format(file_name)))
     
     raise NotImplementedError
@@ -55,6 +72,11 @@ def read_langs_dial(file_name, ontology, dialog_act, max_line = None, domain_act
 
 
 def prepare_data_camrest676(args):
+    """
+    Prepare pair of - example example.
+
+    Args:
+    """
     example_type = args["example_type"]
     max_line = args["max_line"]
     

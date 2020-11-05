@@ -55,6 +55,12 @@ class Dataset_dm(torch.utils.data.Dataset):
         return item_info
 
     def __len__(self):
+        """
+        Returns the number of bytes in bytes.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.num_total_seqs
 
     def preprocess(self, sequence):
@@ -64,9 +70,25 @@ class Dataset_dm(torch.utils.data.Dataset):
         return story
     
     def concat_dh_sys_usr(self, dialog_history, sys, usr):
+        """
+        Concatenate the next token.
+
+        Args:
+            self: (todo): write your description
+            dialog_history: (bool): write your description
+            sys: (todo): write your description
+            usr: (todo): write your description
+        """
         return dialog_history + " {} ".format(self.sys_token) + " {} ".format(self.sep_token) + sys + " {} ".format(self.usr_token) + usr
 
     def get_concat_context(self, dialog_history):
+        """
+        Returns a string representing the history context.
+
+        Args:
+            self: (todo): write your description
+            dialog_history: (todo): write your description
+        """
         dialog_history_str = ""
         for ui, uttr in enumerate(dialog_history):
             if ui%2 == 0:
@@ -78,6 +100,12 @@ class Dataset_dm(torch.utils.data.Dataset):
 
 
 def collate_fn_dm_turn(data):
+    """
+    Collate tensors item into a dict.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context']), reverse=True) 
     
@@ -99,6 +127,12 @@ def collate_fn_dm_turn(data):
 
 
 def collate_fn_nlu_dial(data):
+    """
+    Collate the fn_nlu_dial_dial.
+
+    Args:
+        data: (array): write your description
+    """
     # TODO
     return 
 

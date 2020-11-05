@@ -5,6 +5,13 @@ import os
 from .utils_function import get_input_example
 
 def read_langs_turn(file_name, max_line = None):
+    """
+    Reads lang lang file
+
+    Args:
+        file_name: (str): write your description
+        max_line: (int): write your description
+    """
     print(("Reading from {} for read_langs_turn".format(file_name)))
     
     data = []
@@ -53,10 +60,23 @@ def read_langs_turn(file_name, max_line = None):
 
 
 def read_langs_dial(file_name, label_dict, max_line = None):
+    """
+    Reads the lang file.
+
+    Args:
+        file_name: (str): write your description
+        label_dict: (dict): write your description
+        max_line: (int): write your description
+    """
     raise NotImplementedError
 
 
 def prepare_data_universal_act_dstc2(args):
+    """
+    Prepare example data for example example.
+
+    Args:
+    """
     example_type = args["example_type"]
     max_line = args["max_line"]
     
@@ -83,6 +103,11 @@ def prepare_data_universal_act_dstc2(args):
 
 
 def prepare_data_universal_act_sim_joint(args):
+    """
+    Prepare example data.
+
+    Args:
+    """
     example_type = args["example_type"]
     max_line = args["max_line"]
     

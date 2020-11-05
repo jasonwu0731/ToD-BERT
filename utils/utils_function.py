@@ -4,6 +4,12 @@ import numpy as np
 PAD_token = 0
 
 def to_cuda(x):
+    """
+    Convert a cuda object
+
+    Args:
+        x: (todo): write your description
+    """
     if torch.cuda.is_available(): x = x.cuda()
     return x
 
@@ -70,6 +76,12 @@ def merge_sent_and_word(sequences, ignore_idx=None):
 
 
 def get_input_example(example_type):
+    """
+    Returns an example example.
+
+    Args:
+        example_type: (str): write your description
+    """
     
     if example_type == "turn":
         

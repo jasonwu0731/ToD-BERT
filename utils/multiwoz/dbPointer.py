@@ -93,6 +93,14 @@ def queryResult(domain, turn):
 
 
 def queryResultVenues(domain, turn, real_belief=False):
+    """
+    Query sql query *
+
+    Args:
+        domain: (str): write your description
+        turn: (dict): write your description
+        real_belief: (str): write your description
+    """
     # query the db
     sql_query = "select * from {}".format(domain)
 

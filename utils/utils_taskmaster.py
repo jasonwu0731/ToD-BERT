@@ -7,6 +7,14 @@ from .utils_function import get_input_example
 
 
 def read_langs_turn(args, dials, ds_name, max_line):
+    """
+    Read lang history. language file.
+
+    Args:
+        dials: (todo): write your description
+        ds_name: (str): write your description
+        max_line: (int): write your description
+    """
     print(("Reading from {} for read_langs_turn".format(ds_name)))
     
     data = []
@@ -48,6 +56,16 @@ def read_langs_turn(args, dials, ds_name, max_line):
 
 
 def read_langs_dial(file_name, ontology, dialog_act, max_line = None, domain_act_flag=False):
+    """
+    Reads the language file
+
+    Args:
+        file_name: (str): write your description
+        ontology: (float): write your description
+        dialog_act: (str): write your description
+        max_line: (int): write your description
+        domain_act_flag: (todo): write your description
+    """
     print(("Reading from {} for read_langs_dial".format(file_name)))
     
     raise NotImplementedError
@@ -55,6 +73,11 @@ def read_langs_dial(file_name, ontology, dialog_act, max_line = None, domain_act
 
 
 def prepare_data_taskmaster(args):
+    """
+    Prepares the data task for training task.
+
+    Args:
+    """
     ds_name = "TaskMaster"
     
     example_type = args["example_type"]

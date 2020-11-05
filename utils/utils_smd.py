@@ -7,6 +7,14 @@ from .utils_function import get_input_example
 
 
 def read_langs_turn(args, file_name, max_line = None, ds_name=""):
+    """
+    Read language language history.
+
+    Args:
+        file_name: (str): write your description
+        max_line: (int): write your description
+        ds_name: (str): write your description
+    """
     print(("Reading from {} for read_langs_turn".format(file_name)))
     
     data = []
@@ -50,12 +58,27 @@ def read_langs_turn(args, file_name, max_line = None, ds_name=""):
 
 
 def read_langs_dial(file_name, ontology, dialog_act, max_line = None, domain_act_flag=False):
+    """
+    Reads the language file
+
+    Args:
+        file_name: (str): write your description
+        ontology: (float): write your description
+        dialog_act: (str): write your description
+        max_line: (int): write your description
+        domain_act_flag: (todo): write your description
+    """
     print(("Reading from {} for read_langs_dial".format(file_name)))
     raise NotImplementedError
 
 
 
 def prepare_data_smd(args):
+    """
+    Prepare smd dataset.
+
+    Args:
+    """
     ds_name = "SMD"
     
     example_type = args["example_type"]

@@ -104,6 +104,12 @@ class Dataset_nlg(torch.utils.data.Dataset):
         return item_info
 
     def __len__(self):
+        """
+        Returns the number of bytes in bytes.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.num_total_seqs
     
     def preprocess(self, sequence):
@@ -113,6 +119,13 @@ class Dataset_nlg(torch.utils.data.Dataset):
         return story
     
     def get_concat_context(self, dialog_history):
+        """
+        Returns a string representing the history context.
+
+        Args:
+            self: (todo): write your description
+            dialog_history: (todo): write your description
+        """
         dialog_history_str = ""
         for ui, uttr in enumerate(dialog_history):
             if ui%2 == 0:
@@ -124,6 +137,12 @@ class Dataset_nlg(torch.utils.data.Dataset):
         
 
 def collate_fn_nlg_turn(data):
+    """
+    Collate the utterances into a utterance.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context']), reverse=True) 
     
