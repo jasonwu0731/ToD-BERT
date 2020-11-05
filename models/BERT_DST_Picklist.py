@@ -21,6 +21,12 @@ def _gelu(x):
 
 class BeliefTracker(nn.Module):
     def __init__(self, args):
+        """
+        Stub
+
+        Args:
+            self: (todo): write your description
+        """
         super(BeliefTracker, self).__init__()
         
         self.args = args
@@ -88,6 +94,12 @@ class BeliefTracker(nn.Module):
         
         ## Prepare Optimizer
         def get_optimizer_grouped_parameters(model):
+            """
+            Get the optimizer parameters from the model.
+
+            Args:
+                model: (todo): write your description
+            """
             param_optimizer = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
             no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
@@ -112,12 +124,25 @@ class BeliefTracker(nn.Module):
         self.initialize_slot_value_lookup()
         
     def optimize(self):
+        """
+        Optimize the optimizer.
+
+        Args:
+            self: (todo): write your description
+        """
         self.loss_grad.backward()
         clip_norm = torch.nn.utils.clip_grad_norm_(self.parameters(), self.args["grad_clip"])
         self.optimizer.step()
         
     
     def initialize_slot_value_lookup(self, max_seq_length=32):
+        """
+        Initialize a tokenizer for a sequence.
+
+        Args:
+            self: (todo): write your description
+            max_seq_length: (int): write your description
+        """
 
         self.sv_encoder.eval()
         
@@ -164,6 +189,13 @@ class BeliefTracker(nn.Module):
         print("Complete initialization of slot and value lookup")
 
     def forward(self, data):#input_ids, input_len, labels, gate_label, n_gpu=1, target_slot=None):
+        """
+        Forward computation.
+
+        Args:
+            self: (todo): write your description
+            data: (array): write your description
+        """
         batch_size = data["context"].size(0)
         labels = data["belief_ontology"]
 
@@ -240,6 +272,14 @@ class BeliefTracker(nn.Module):
         return outputs
 
     def evaluation(self, preds, labels):
+        """
+        Evaluate the probability.
+
+        Args:
+            self: (todo): write your description
+            preds: (array): write your description
+            labels: (list): write your description
+        """
         preds = np.array(preds)
         labels = np.array(labels)
 

@@ -16,6 +16,13 @@ for line in fin.readlines():
 
 
 def insertSpace(token, text):
+    """
+    Inserts the last token into a list.
+
+    Args:
+        token: (str): write your description
+        text: (str): write your description
+    """
     sidx = 0
     while True:
         sidx = text.find(token, sidx)
@@ -35,6 +42,13 @@ def insertSpace(token, text):
 
 
 def normalize(text, clean_value=True):
+    """
+    Normalize text.
+
+    Args:
+        text: (str): write your description
+        clean_value: (bool): write your description
+    """
     # lower case every word
     text = text.lower()
 
@@ -125,9 +139,24 @@ class BLEUScorer(object):
     ## it calculates the BLEU-4 by taking the entire corpus in
     ## Calulate based multiple candidates against multiple references
     def __init__(self):
+        """
+        Initialize the object
+
+        Args:
+            self: (todo): write your description
+        """
         pass
 
     def score(self, hypothesis, corpus, n=1):
+        """
+        Compute the score.
+
+        Args:
+            self: (todo): write your description
+            hypothesis: (todo): write your description
+            corpus: (todo): write your description
+            n: (todo): write your description
+        """
         # containers
         count = [0, 0, 0, 0]
         clip_count = [0, 0, 0, 0]
@@ -190,13 +219,35 @@ class BLEUScorer(object):
 
 class GentScorer(object):
     def __init__(self, detectfile):
+        """
+        Æł¥æĭè½æķ°æį®
+
+        Args:
+            self: (todo): write your description
+            detectfile: (str): write your description
+        """
         self.bleuscorer = BLEUScorer()
 
     def scoreBLEU(self, parallel_corpus):
+        """
+        Compute the rocities. k - scores.
+
+        Args:
+            self: (todo): write your description
+            parallel_corpus: (todo): write your description
+        """
         return self.bleuscorer.score(parallel_corpus)
 
 
 def sentence_bleu_4(hyp, refs, weights=[0.25, 0.25, 0.25, 0.25]):
+    """
+    Compute the sentence sentence of a sentence.
+
+    Args:
+        hyp: (todo): write your description
+        refs: (todo): write your description
+        weights: (array): write your description
+    """
     # input : single sentence, multiple references
     count = [0, 0, 0, 0]
     clip_count = [0, 0, 0, 0]

@@ -6,6 +6,14 @@ from .utils_function import get_input_example
 
 
 def read_langs(args, dtype, _data, _oos_data):
+    """
+    Read a dtype of a given type.
+
+    Args:
+        dtype: (todo): write your description
+        _data: (str): write your description
+        _oos_data: (str): write your description
+    """
     print(("Reading [OOS Intent] for read_langs {}".format(dtype)))
     
     data = []
@@ -32,6 +40,11 @@ def read_langs(args, dtype, _data, _oos_data):
 
 
 def prepare_data_oos_intent(args):
+    """
+    Prepare data for intent.
+
+    Args:
+    """
     example_type = args["example_type"]
     max_line = args["max_line"]
     

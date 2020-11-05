@@ -77,9 +77,24 @@ class Dataset_dst(torch.utils.data.Dataset):
         return item_info
 
     def __len__(self):
+        """
+        Returns the number of bytes in bytes.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.num_total_seqs
     
     def concat_dh_sys_usr(self, dialog_history, sys, usr):
+        """
+        Concatenate the next token.
+
+        Args:
+            self: (todo): write your description
+            dialog_history: (bool): write your description
+            sys: (todo): write your description
+            usr: (todo): write your description
+        """
         return dialog_history + " {} ".format(self.sep_token) + " {} ".format(self.sys_token) + sys + " {} ".format(self.usr_token) + usr
 
     def preprocess(self, sequence):
@@ -98,6 +113,13 @@ class Dataset_dst(torch.utils.data.Dataset):
         return story
     
     def get_concat_context(self, dialog_history):
+        """
+        Returns a string representing the history context.
+
+        Args:
+            self: (todo): write your description
+            dialog_history: (todo): write your description
+        """
         dialog_history_str = ""
         for ui, uttr in enumerate(dialog_history):
             if ui%2 == 0:
@@ -109,6 +131,12 @@ class Dataset_dst(torch.utils.data.Dataset):
 
 
 def collate_fn_dst_turn(data):
+    """
+    Collate dst_dst_turnsitem into a tensor.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context']), reverse=True) 
     
@@ -134,6 +162,12 @@ def collate_fn_dst_turn(data):
     return item_info
 
 def collate_fn_dst_dial(data):
+    """
+    Collate dst_dst_dst.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context']), reverse=True) 
     

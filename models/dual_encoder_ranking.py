@@ -16,6 +16,12 @@ from transformers import *
 
 class dual_encoder_ranking(nn.Module):
     def __init__(self, args): #, num_labels, device):
+        """
+        Initialize the module.
+
+        Args:
+            self: (todo): write your description
+        """
         super(dual_encoder_ranking, self).__init__()
         self.args = args
         self.xeloss = nn.CrossEntropyLoss()
@@ -30,6 +36,12 @@ class dual_encoder_ranking(nn.Module):
 
         ## Prepare Optimizer
         def get_optimizer_grouped_parameters(model):
+            """
+            Get the optimizer parameters from the model.
+
+            Args:
+                model: (todo): write your description
+            """
             param_optimizer = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
             no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
@@ -52,11 +64,24 @@ class dual_encoder_ranking(nn.Module):
                                  #t_total=t_total)
 
     def optimize(self):
+        """
+        Optimize the optimizer.
+
+        Args:
+            self: (todo): write your description
+        """
         self.loss_grad.backward()
         clip_norm = torch.nn.utils.clip_grad_norm_(self.parameters(), self.args["grad_clip"])
         self.optimizer.step()
     
     def forward(self, data):
+        """
+        Forward computation.
+
+        Args:
+            self: (todo): write your description
+            data: (array): write your description
+        """
                 #input_ids, input_len, labels=None, n_gpu=1, target_slot=None):
        
         self.optimizer.zero_grad()
@@ -126,12 +151,28 @@ class dual_encoder_ranking(nn.Module):
         return outputs
     
     def evaluation(self, preds, labels):
+        """
+        Compute the probability of the model.
+
+        Args:
+            self: (todo): write your description
+            preds: (array): write your description
+            labels: (list): write your description
+        """
         assert len(preds) == len(labels)
         
         preds = np.array(preds)
         labels = np.array(labels)
         
         def _recall_topk(preds_top10, labels, k):
+            """
+            Returns the k - k predictions.
+
+            Args:
+                preds_top10: (todo): write your description
+                labels: (str): write your description
+                k: (todo): write your description
+            """
             preds = preds_top10[:, -k:]
             acc = 0
             for li, label in enumerate(labels):

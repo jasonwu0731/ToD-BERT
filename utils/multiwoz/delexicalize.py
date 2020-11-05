@@ -18,6 +18,11 @@ pricepat2 = re.compile("\d{1,3}[.]\d{1,2}")
 
 
 def prepareSlotValuesIndependent():
+    """
+    Prepare the database to the database
+
+    Args:
+    """
     domains = ['restaurant', 'hotel', 'attraction', 'train', 'taxi', 'hospital', 'police']
     requestables = ['phone', 'address', 'postcode', 'reference', 'id']
     dic = []
@@ -125,6 +130,13 @@ def prepareSlotValuesIndependent():
 
 
 def delexicalise(utt, dictionary):
+    """
+    Delexicalise a dictionary in a dictionary.
+
+    Args:
+        utt: (todo): write your description
+        dictionary: (dict): write your description
+    """
     for key, val in dictionary:
         utt = (' ' + utt + ' ').replace(' ' + key + ' ', ' ' + val + ' ')
         utt = utt[1:-1]  # why this?
@@ -133,6 +145,14 @@ def delexicalise(utt, dictionary):
 
 
 def delexicaliseDomain(utt, dictionary, domain):
+    """
+    Delexicalise a dictionary into a dictionary.
+
+    Args:
+        utt: (todo): write your description
+        dictionary: (dict): write your description
+        domain: (str): write your description
+    """
     for key, val in dictionary:
         if key == domain or key == 'value':
             utt = (' ' + utt + ' ').replace(' ' + key + ' ', ' ' + val + ' ')

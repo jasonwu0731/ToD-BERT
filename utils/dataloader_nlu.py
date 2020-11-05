@@ -77,6 +77,12 @@ class Dataset_nlu(torch.utils.data.Dataset):
         return item_info
 
     def __len__(self):
+        """
+        Returns the number of bytes in bytes.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.num_total_seqs
 
     def preprocess(self, sequence):
@@ -87,6 +93,12 @@ class Dataset_nlu(torch.utils.data.Dataset):
 
 
 def collate_fn_nlu_turn(data):
+    """
+    Collate the item into a dict of item items.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context']), reverse=True) 
     
@@ -112,6 +124,12 @@ def collate_fn_nlu_turn(data):
 
 
 def collate_fn_nlu_dial(data):
+    """
+    Collate the fn_nlu_dial_dial.
+
+    Args:
+        data: (array): write your description
+    """
     # TODO
     return 
 

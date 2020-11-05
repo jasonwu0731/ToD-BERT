@@ -10,6 +10,17 @@ EXPERIMENT_DOMAINS = ["hotel", "train", "restaurant", "attraction", "taxi"] #, "
 
 
 def read_langs_turn(args, file_name, ontology, dialog_act, max_line = None, domain_act_flag=False, update_ont_flag=False):
+    """
+    Reads a language.
+
+    Args:
+        file_name: (str): write your description
+        ontology: (str): write your description
+        dialog_act: (str): write your description
+        max_line: (int): write your description
+        domain_act_flag: (todo): write your description
+        update_ont_flag: (bool): write your description
+    """
     print(("Reading from {} for read_langs_turn".format(file_name)))
     
     data = []
@@ -125,11 +136,28 @@ def read_langs_turn(args, file_name, ontology, dialog_act, max_line = None, doma
 
 
 def read_langs_dial(args, file_name, ontology, dialog_act, max_line = None, domain_act_flag=False, update_ont_flag=False):
+    """
+    Reads the language file
+
+    Args:
+        file_name: (str): write your description
+        ontology: (float): write your description
+        dialog_act: (str): write your description
+        max_line: (int): write your description
+        domain_act_flag: (todo): write your description
+        update_ont_flag: (bool): write your description
+    """
     print(("Reading from {} for read_langs_dial".format(file_name)))
     raise NotImplementedError
 
     
 def get_slot_information(args, ontology):
+    """
+    Returns the ontology information about an ontology
+
+    Args:
+        ontology: (dict): write your description
+    """
     ontology_domains = dict([(k, v) for k, v in ontology.items() if k.split("-")[0] in EXPERIMENT_DOMAINS])
     ontology_new = collections.OrderedDict()
     for k, v in ontology_domains.items():
@@ -146,6 +174,11 @@ def get_slot_information(args, ontology):
 
 
 def prepare_data_multiwoz(args):
+    """
+    Prepare multi - ontology
+
+    Args:
+    """
     example_type = args["example_type"]
     max_line = args["max_line"]
     

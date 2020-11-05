@@ -6,6 +6,13 @@ import torch.nn as nn
 import numpy as np
 
 def sequence_mask(sequence_length, max_len=None):
+    """
+    Generate a boolean mask.
+
+    Args:
+        sequence_length: (int): write your description
+        max_len: (int): write your description
+    """
     if max_len is None:
         max_len = sequence_length.data.max()
     batch_size = sequence_length.size(0)
@@ -19,6 +26,13 @@ def sequence_mask(sequence_length, max_len=None):
     return seq_range_expand < seq_length_expand
 
 def cross_entropy(logits, target):
+    """
+    Calculate the entropy of a set of - entropy.
+
+    Args:
+        logits: (todo): write your description
+        target: (todo): write your description
+    """
     batch_size = logits.size(0)
     log_probs_flat = functional.log_softmax(logits)
     losses_flat = -torch.gather(log_probs_flat, dim=1, index=target)
@@ -81,6 +95,15 @@ def masked_binary_cross_entropy(logits, target, length):
 
 
 def masked_cross_entropy_(logits, target, length, take_log=False):
+    """
+    Calculate the entropy of the entropy.
+
+    Args:
+        logits: (todo): write your description
+        target: (todo): write your description
+        length: (int): write your description
+        take_log: (bool): write your description
+    """
     if USE_CUDA:
         length = Variable(torch.LongTensor(length)).cuda()
     else:
@@ -103,6 +126,14 @@ def masked_cross_entropy_(logits, target, length, take_log=False):
     return loss
 
 def masked_coverage_loss(coverage, attention, length):
+    """
+    Calculate coverage.
+
+    Args:
+        coverage: (bool): write your description
+        attention: (todo): write your description
+        length: (int): write your description
+    """
     if USE_CUDA:
         length = Variable(torch.LongTensor(length)).cuda()
     else:
@@ -115,6 +146,15 @@ def masked_coverage_loss(coverage, attention, length):
     return loss
 
 def masked_cross_entropy_for_slot(logits, target, mask, use_softmax=True):
+    """
+    Calculate the entropy of a logits.
+
+    Args:
+        logits: (todo): write your description
+        target: (todo): write your description
+        mask: (array): write your description
+        use_softmax: (int): write your description
+    """
     # print("logits", logits)
     # print("target", target)
     logits_flat = logits.view(-1, logits.size(-1)) ## -1 means infered from other dimentions
@@ -134,6 +174,14 @@ def masked_cross_entropy_for_slot(logits, target, mask, use_softmax=True):
     return loss
 
 def masked_cross_entropy_for_value(logits, target, mask):
+    """
+    Calculate the entropy of a loss.
+
+    Args:
+        logits: (todo): write your description
+        target: (todo): write your description
+        mask: (array): write your description
+    """
     # logits: b * |s| * m * |v|
     # target: b * |s| * m
     # mask:   b * |s|
@@ -149,6 +197,13 @@ def masked_cross_entropy_for_value(logits, target, mask):
     return loss
 
 def masking(losses, mask):
+    """
+    Mask the mask.
+
+    Args:
+        losses: (todo): write your description
+        mask: (array): write your description
+    """
     mask_ = []
     batch_size = mask.size(0)
     max_len = losses.size(2)

@@ -79,6 +79,11 @@ MODEL_CLASSES = {
 
 
 def set_seed(args):
+    """
+    Sets random seed.
+
+    Args:
+    """
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -87,6 +92,13 @@ def set_seed(args):
 
 
 def _rotate_checkpoints(args, checkpoint_prefix, use_mtime=False):
+    """
+    Rotate checkpoint checkpoint.
+
+    Args:
+        checkpoint_prefix: (str): write your description
+        use_mtime: (bool): write your description
+    """
     if not args.save_total_limit:
         return
     if args.save_total_limit <= 0:
@@ -557,6 +569,15 @@ def train(args, trn_loader, dev_loader, model, tokenizer, cand_uttr_sys_dict, ot
 
 
 def evaluate(args, model, dev_loader, tokenizer, prefix=""):
+    """
+    Evaluate the model on the model.
+
+    Args:
+        model: (todo): write your description
+        dev_loader: (todo): write your description
+        tokenizer: (str): write your description
+        prefix: (str): write your description
+    """
     eval_output_dir = args.output_dir
 
     if not os.path.exists(eval_output_dir) and args.local_rank in [-1, 0]:
@@ -616,6 +637,11 @@ def evaluate(args, model, dev_loader, tokenizer, prefix=""):
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     parser = argparse.ArgumentParser()
 
     # Required parameters

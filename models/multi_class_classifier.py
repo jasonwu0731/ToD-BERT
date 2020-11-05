@@ -16,6 +16,12 @@ from transformers import *
 
 class multi_class_classifier(nn.Module):
     def __init__(self, args): #, num_labels, device):
+        """
+        Initialize the functional.
+
+        Args:
+            self: (todo): write your description
+        """
         super(multi_class_classifier, self).__init__()
         self.args = args
         self.hidden_dim = args["hdd_size"]
@@ -42,6 +48,12 @@ class multi_class_classifier(nn.Module):
 
         ## Prepare Optimizer
         def get_optimizer_grouped_parameters(model):
+            """
+            Get the optimizer parameters from the model.
+
+            Args:
+                model: (todo): write your description
+            """
             param_optimizer = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
             no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
             optimizer_grouped_parameters = [
@@ -64,11 +76,24 @@ class multi_class_classifier(nn.Module):
                                  #t_total=t_total)
 
     def optimize(self):
+        """
+        Optimize the optimizer.
+
+        Args:
+            self: (todo): write your description
+        """
         self.loss_grad.backward()
         clip_norm = torch.nn.utils.clip_grad_norm_(self.parameters(), self.args["grad_clip"])
         self.optimizer.step()
     
     def forward(self, data):
+        """
+        Forward computation.
+
+        Args:
+            self: (todo): write your description
+            data: (array): write your description
+        """
                 #input_ids, input_len, labels=None, n_gpu=1, target_slot=None):
        
         self.optimizer.zero_grad()
@@ -123,6 +148,14 @@ class multi_class_classifier(nn.Module):
         return outputs
     
     def evaluation(self, preds, labels):
+        """
+        Calculate the accuracy
+
+        Args:
+            self: (todo): write your description
+            preds: (array): write your description
+            labels: (list): write your description
+        """
         preds = np.array(preds)
         labels = np.array(labels)
         

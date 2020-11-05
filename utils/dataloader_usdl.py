@@ -44,9 +44,24 @@ class Dataset_usdl(torch.utils.data.Dataset):
         return item_info
 
     def __len__(self):
+        """
+        Returns the number of bytes in bytes.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.num_total_seqs
     
     def concat_dh_sys_usr(self, dialog_history, sys, usr):
+        """
+        Concatenate the next token.
+
+        Args:
+            self: (todo): write your description
+            dialog_history: (bool): write your description
+            sys: (todo): write your description
+            usr: (todo): write your description
+        """
         return dialog_history + " {} ".format(self.sys_token) + sys + " {} ".format(self.usr_token) + usr
 
     def preprocess(self, sequence):
@@ -65,6 +80,13 @@ class Dataset_usdl(torch.utils.data.Dataset):
         return story
     
     def get_concat_context(self, dialog_history):
+        """
+        Returns the history context for the history of the user.
+
+        Args:
+            self: (todo): write your description
+            dialog_history: (todo): write your description
+        """
         candidate_sys_responses = []
         dialog_history_str = ""
         for ui, uttr in enumerate(dialog_history):
@@ -77,6 +99,12 @@ class Dataset_usdl(torch.utils.data.Dataset):
 
 
 def collate_fn_usdl_turn(data):
+    """
+    Collate a dict into a data item.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context']), reverse=True) 
     
@@ -93,6 +121,12 @@ def collate_fn_usdl_turn(data):
     return item_info
 
 def collate_fn_usdl_dial(data):
+    """
+    Collate the data_info objects for each item.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context']), reverse=True) 
     
@@ -109,6 +143,12 @@ def collate_fn_usdl_dial(data):
     return item_info
 
 def collate_fn_usdl_dial_flat(data):
+    """
+    Collate a dictionary of data into a dictionary.
+
+    Args:
+        data: (array): write your description
+    """
     # sort a list by sequence length (descending order) to use pack_padded_sequence
     data.sort(key=lambda x: len(x['context_flat']), reverse=True) 
     

@@ -7,6 +7,14 @@ from .utils_function import get_input_example
 
 
 def read_langs_turn(args, dial_files, max_line = None, ds_name=""):
+    """
+    Read lang history.
+
+    Args:
+        dial_files: (str): write your description
+        max_line: (int): write your description
+        ds_name: (str): write your description
+    """
     print(("Reading from {} for read_langs_turn".format(ds_name)))
     
     data = []
@@ -50,6 +58,16 @@ def read_langs_turn(args, dial_files, max_line = None, ds_name=""):
 
 
 def read_langs_dial(file_name, ontology, dialog_act, max_line = None, domain_act_flag=False):
+    """
+    Reads the language file
+
+    Args:
+        file_name: (str): write your description
+        ontology: (float): write your description
+        dialog_act: (str): write your description
+        max_line: (int): write your description
+        domain_act_flag: (todo): write your description
+    """
     print(("Reading from {} for read_langs_dial".format(file_name)))
     
     raise NotImplementedError
@@ -57,6 +75,11 @@ def read_langs_dial(file_name, ontology, dialog_act, max_line = None, domain_act
 
 
 def prepare_data_metalwoz(args):
+    """
+    Prepare example files.
+
+    Args:
+    """
     ds_name = "MetaLWOZ"
     
     example_type = args["example_type"]
