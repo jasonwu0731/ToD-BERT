@@ -12,11 +12,20 @@ The underlying difference of linguistic patterns between general text and task-o
 ## Citation
 If you use any source codes, pretrained models or datasets included in this repo in your work, please cite the following paper. The bibtex is listed below:
 <pre>
-@article{wu2020tod,
-  title={ToD-BERT: Pre-trained Natural Language Understanding for Task-Oriented Dialogues},
-  author={Wu, Chien-Sheng and Hoi, Steven and Socher, Richard and Xiong, Caiming},
-  journal={arXiv preprint arXiv:2004.06871},
-  year={2020}
+@inproceedings{wu-etal-2020-tod,
+    title = "{TOD}-{BERT}: Pre-trained Natural Language Understanding for Task-Oriented Dialogue",
+    author = "Wu, Chien-Sheng  and
+      Hoi, Steven C.H.  and
+      Socher, Richard  and
+      Xiong, Caiming",
+    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2020.emnlp-main.66",
+    doi = "10.18653/v1/2020.emnlp-main.66",
+    pages = "917--929"
 }
 </pre>
 
