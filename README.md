@@ -49,8 +49,8 @@ tod_bert = AutoModel.from_pretrained("TODBERT/TOD-BERT-JNT-V1")
 ```
 
 You can also downloaded the pre-trained models from the following links:
-* [ToD-BERT-mlm V1](https://drive.google.com/file/d/1vxqTda4MIYb1VDIA4NOokq7uCM4MW_1J/view?usp=sharing)
-* [ToD-BERT-jnt V1](https://drive.google.com/file/d/17F-wS4PwR6iz-Ubj0TaNsxNyMscgO3VV/view?usp=sharing)
+* [ToD-BERT-mlm V1](https://huggingface.co/TODBERT/TOD-BERT-MLM-V1/tree/main)
+* [ToD-BERT-jnt V1](https://huggingface.co/TODBERT/TOD-BERT-JNT-V1/tree/main)
 ```
 model_name_or_path = <path_to_the_downloaded_tod-bert>
 model_class, tokenizer_class, config_class = BertModel, BertTokenizer, BertConfig
