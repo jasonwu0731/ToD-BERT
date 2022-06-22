@@ -1,6 +1,6 @@
 torch==1.6.0a0+9907a3e
 six==1.15.0
-numpy==1.18.1
+numpy==1.22.0
 tqdm==4.31.1
 transformers==3.0.2
 nltk
