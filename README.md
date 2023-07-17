@@ -80,7 +80,7 @@ with torch.no_grad():
 ```
 
 ## Training and Testing
-If you would like to train the model yourself, you can download those datasets yourself from each of their original papers or sources. You can also direct download a zip file [here](https://drive.google.com/file/d/1EnGX0UF4KW6rVBKMF3fL-9Q2ZyFKNOIy/view?usp=sharing).
+If you would like to train the model yourself, you can download those datasets yourself from each of their original papers or sources. You can also direct download a zip file [here](https://drive.google.com/file/d/1iy0x3MFkX3OLC080VlgGANchfCjAhbRy/view?usp=sharing).
 
 The repository is currently in this structure:
 ```
