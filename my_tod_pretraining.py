@@ -116,41 +116,43 @@ def _rotate_checkpoints(args, checkpoint_prefix, use_mtime=False):
 
 
 def mask_tokens(inputs: torch.Tensor, tokenizer: PreTrainedTokenizer, args) -> Tuple[torch.Tensor, torch.Tensor]:
-    """ Prepare masked tokens inputs/labels for masked language modeling: 80% MASK, 10% random, 10% original. """
-    
+    """Prepare masked tokens inputs/labels for masked language modeling: 80% MASK, 10% random, 10% original."""
+
     inputs = inputs.to("cpu")
     labels = inputs.clone()
-    
+
     # We sample a few tokens in each sequence for masked-LM training (with probability args.mlm_probability defaults to 0.15 in Bert/RoBERTa)
     probability_matrix = torch.full(labels.shape, args.mlm_probability)
     special_tokens_mask = [
         tokenizer.get_special_tokens_mask(val, already_has_special_tokens=True) for val in labels.tolist()
     ]
     probability_matrix.masked_fill_(torch.tensor(special_tokens_mask, dtype=torch.bool), value=0.0)
-    
+
     # padding position value = 0
     inputs_pad_pos = (inputs == 0).cpu()
     probability_matrix.masked_fill_(inputs_pad_pos, value=0.0)
-    
+
     masked_indices = torch.bernoulli(probability_matrix).bool()
     try:
         labels[~masked_indices] = -100  # We only compute loss on masked tokens
     except:
         masked_indices = masked_indices.byte()
         labels[~masked_indices] = -100  # We only compute loss on masked tokens
-        
+
     # 80% of the time, we replace masked input tokens with tokenizer.mask_token ([MASK])
     try:
         indices_replaced = torch.bernoulli(torch.full(labels.shape, 0.8)).bool() & masked_indices
     except:
         indices_replaced = torch.bernoulli(torch.full(labels.shape, 0.8)).bool().byte() & masked_indices
     inputs[indices_replaced] = tokenizer.convert_tokens_to_ids(tokenizer.mask_token)
-    
+
     # 10% of the time, we replace masked input tokens with random word
     try:
         indices_random = torch.bernoulli(torch.full(labels.shape, 0.5)).bool() & masked_indices & ~indices_replaced
     except:
-        indices_random = torch.bernoulli(torch.full(labels.shape, 0.5)).bool().byte() & masked_indices & ~indices_replaced
+        indices_random = (
+            torch.bernoulli(torch.full(labels.shape, 0.5)).bool().byte() & masked_indices & ~indices_replaced
+        )
     random_words = torch.randint(len(tokenizer), labels.shape, dtype=torch.long)
     if inputs.is_cuda:
         indices_random = indices_random.to(args.device)
@@ -162,8 +164,8 @@ def mask_tokens(inputs: torch.Tensor, tokenizer: PreTrainedTokenizer, args) -> T
 
 
 def mask_for_response_selection(batch, tokenizer, args, cand_uttr_sys_dict, others, set_max_resp_len=150):
-    """ Prepare (context,response) pairs for response contrastive learning (RCL). """
-    
+    """Prepare (context,response) pairs for response contrastive learning (RCL)."""
+
     inputs = batch["context"]
     inputs = inputs.to("cpu")
     batch_size = inputs.size(0)
@@ -178,14 +180,14 @@ def mask_for_response_selection(batch, tokenizer, args, cand_uttr_sys_dict, othe
     for bsz_i, batch_sample in enumerate(inputs):
         nb_sys_token = len((batch_sample == sys_token_idx).nonzero())
         nb_usr_token = len((batch_sample == usr_token_idx).nonzero())
-        
-        ## Randomly select a turn to split 
-        if nb_sys_token == 0 or nb_usr_token == 0: 
-            last_sys_position.append(len(batch_sample)//2)
+
+        ## Randomly select a turn to split
+        if nb_sys_token == 0 or nb_usr_token == 0:
+            last_sys_position.append(len(batch_sample) // 2)
             last_usr_position.append(len(batch_sample))
         else:
             if nb_sys_token > 2 and nb_usr_token > 2:
-                rand_pos = random.randint(1, min(nb_sys_token, nb_usr_token)-1)
+                rand_pos = random.randint(1, min(nb_sys_token, nb_usr_token) - 1)
             else:
                 rand_pos = -1
 
@@ -203,23 +205,25 @@ def mask_for_response_selection(batch, tokenizer, args, cand_uttr_sys_dict, othe
     last_usr_position = np.array(last_usr_position)
     last_sys_position = np.array(last_sys_position)
     max_last_sys_position = max(last_sys_position)
-    max_response_len = max(last_usr_position-last_sys_position) + 1
+    max_response_len = max(last_usr_position - last_sys_position) + 1
     max_response_len = max_response_len if max_response_len < set_max_resp_len else set_max_resp_len
-    
+
     ## placeholders
-    input_contexts = torch.zeros(batch_size, max_last_sys_position).long() #.to(args.device)
-    input_responses = torch.zeros(batch_size, max_response_len).long() #.to(args.device)
-    output_labels = torch.tensor(np.arange(batch_size)).long() #.to(args.device)
-    
+    input_contexts = torch.zeros(batch_size, max_last_sys_position).long()  # .to(args.device)
+    input_responses = torch.zeros(batch_size, max_response_len).long()  # .to(args.device)
+    output_labels = torch.tensor(np.arange(batch_size)).long()  # .to(args.device)
+
     ## assign response indexs by start and end position
     responses = []
     for bsz_i, (sys_pos, usr_pos) in enumerate(zip(last_sys_position, last_usr_position)):
         input_contexts[bsz_i, :sys_pos] = inputs[bsz_i, :sys_pos]
-        input_responses[bsz_i, 0] = inputs[bsz_i, 0] ## CLS token  
-        responses.append(tokenizer.decode(inputs[bsz_i, sys_pos+1:usr_pos]).replace(" ", ""))
-        s, e = (sys_pos, usr_pos) if usr_pos-sys_pos < max_response_len else (sys_pos, sys_pos+max_response_len-1)
-        input_responses[bsz_i, 1:e-s+1] = inputs[bsz_i, s:e]
-    
+        input_responses[bsz_i, 0] = inputs[bsz_i, 0]  ## CLS token
+        responses.append(tokenizer.decode(inputs[bsz_i, sys_pos + 1 : usr_pos]).replace(" ", ""))
+        s, e = (
+            (sys_pos, usr_pos) if usr_pos - sys_pos < max_response_len else (sys_pos, sys_pos + max_response_len - 1)
+        )
+        input_responses[bsz_i, 1 : e - s + 1] = inputs[bsz_i, s:e]
+
     ## Add additional negative samples. Either randomly select from candidate pool or choose by Kmeans.
     candidates_tokens = []
     if args.negative_sampling_by_kmeans:
@@ -227,29 +231,31 @@ def mask_for_response_selection(batch, tokenizer, args, cand_uttr_sys_dict, othe
             if resp in others["ToD_BERT_SYS_UTTR_KMEANS"].keys():
                 cur_cluster = others["ToD_BERT_SYS_UTTR_KMEANS"][resp]
                 candidates = others["KMEANS_to_SENTS"][cur_cluster]
-                nb_selected = min(args.nb_addition_negresponse_per_sample, len(candidates)-1)
-                start_pos = random.randint(0, len(candidates)-nb_selected-1)
-                sampled_neg_resps = candidates[start_pos:start_pos+nb_selected]
+                nb_selected = min(args.nb_addition_negresponse_per_sample, len(candidates) - 1)
+                start_pos = random.randint(0, len(candidates) - nb_selected - 1)
+                sampled_neg_resps = candidates[start_pos : start_pos + nb_selected]
                 candidates_tokens += [cand_uttr_sys_dict[r] for r in sampled_neg_resps]
             else:
-                start_pos = random.randint(0, len(cand_uttr_sys)-args.nb_addition_negresponse_per_sample-1)
-                candidates_tokens += cand_uttr_sys_tokens[start_pos:start_pos+args.nb_addition_negresponse_per_sample]  
+                start_pos = random.randint(0, len(cand_uttr_sys) - args.nb_addition_negresponse_per_sample - 1)
+                candidates_tokens += cand_uttr_sys_tokens[
+                    start_pos : start_pos + args.nb_addition_negresponse_per_sample
+                ]
     else:
         for i in range(args.nb_addition_negresponse_per_sample * batch_size):
-            pos = random.randint(0, len(cand_uttr_sys_tokens)-1)
+            pos = random.randint(0, len(cand_uttr_sys_tokens) - 1)
             candidates_tokens.append(cand_uttr_sys_tokens[pos])
-    
+
     ## Padding
     input_responses_neg = torch.zeros(len(candidates_tokens), max_response_len).long()
     for i in range(len(candidates_tokens)):
         if len(candidates_tokens[i]) > max_response_len:
             input_responses_neg[i] = candidates_tokens[i][:max_response_len]
         else:
-            input_responses_neg[i, :len(candidates_tokens[i])] = candidates_tokens[i]
-    
+            input_responses_neg[i, : len(candidates_tokens[i])] = candidates_tokens[i]
+
     ## Add those negative responses to response selection pool
     input_responses = torch.cat([input_responses, input_responses_neg], 0)
-    
+
     return input_contexts, input_responses, output_labels
 
 
@@ -264,32 +270,32 @@ def get_candidate_embeddings(uttr_sys_dict, tokenizer, model):
     uttr_sys_tokens = list(uttr_sys_dict.values())
     batch_size = 100
     for start in tqdm(range(0, len(uttr_sys), batch_size)):
-        if start+batch_size > len(uttr_sys):
+        if start + batch_size > len(uttr_sys):
             inputs = uttr_sys[start:]
             inputs_ids = uttr_sys_tokens[start:]
         else:
-            inputs = uttr_sys[start:start+batch_size]
-            inputs_ids = uttr_sys_tokens[start:start+batch_size]
+            inputs = uttr_sys[start : start + batch_size]
+            inputs_ids = uttr_sys_tokens[start : start + batch_size]
         inputs_ids = pad_sequence(inputs_ids, batch_first=True, padding_value=0)
-        if torch.cuda.is_available(): inputs_ids = inputs_ids.cuda()
+        if torch.cuda.is_available():
+            inputs_ids = inputs_ids.cuda()
         with torch.no_grad():
-            outputs = model.bert(input_ids=inputs_ids, attention_mask=inputs_ids>0)
+            outputs = model.bert(input_ids=inputs_ids, attention_mask=inputs_ids > 0)
             sequence_output = outputs[0]
             cls_rep = sequence_output[:, 0, :]
         for i in range(cls_rep.size(0)):
-            ToD_BERT_SYS_UTTR_EMB[inputs[i].replace(" ", "")] = {
-                "sent":inputs[i],
-                "emb":cls_rep[i, :].cpu().numpy()}
+            ToD_BERT_SYS_UTTR_EMB[inputs[i].replace(" ", "")] = {"sent": inputs[i], "emb": cls_rep[i, :].cpu().numpy()}
     return ToD_BERT_SYS_UTTR_EMB
-    
-    
+
+
 def get_candidate_kmeans(args, uttr_sys_dict, tokenizer, model):
     """obtain kmeans clustering results"""
     import faiss
+
     print("Start computing kmeans with faiss...")
     ToD_BERT_SYS_UTTR_EMB = get_candidate_embeddings(uttr_sys_dict, tokenizer, model)
     ToD_BERT_SYS_UTTR_KMEANS = {}
-    KMEANS_to_SENTS = {i:[] for i in range(args.nb_kmeans)}
+    KMEANS_to_SENTS = {i: [] for i in range(args.nb_kmeans)}
     data = [v["emb"] for v in ToD_BERT_SYS_UTTR_EMB.values()]
     data = np.array(data)
     kmeans_1k = faiss.Kmeans(data.shape[1], args.nb_kmeans, niter=20, nredo=5, verbose=True)
@@ -298,14 +304,14 @@ def get_candidate_kmeans(args, uttr_sys_dict, tokenizer, model):
     for i, key in enumerate(ToD_BERT_SYS_UTTR_EMB.keys()):
         ToD_BERT_SYS_UTTR_KMEANS[key] = I[i][0]
         KMEANS_to_SENTS[I[i][0]].append(ToD_BERT_SYS_UTTR_EMB[key]["sent"])
-        
+
     return ToD_BERT_SYS_UTTR_KMEANS, KMEANS_to_SENTS
-    
-    
+
+
 def train(args, trn_loader, dev_loader, model, tokenizer, cand_uttr_sys_dict, others):
-    """ Train the model """
+    """Train the model"""
     if args.local_rank in [-1, 0]:
-        tb_writer = SummaryWriter("runs/"+args.output_dir.replace("/","-"))
+        tb_writer = SummaryWriter("runs/" + args.output_dir.replace("/", "-"))
 
     if args.max_steps > 0:
         t_total = args.max_steps
@@ -383,85 +389,87 @@ def train(args, trn_loader, dev_loader, model, tokenizer, cand_uttr_sys_dict, ot
         epochs_trained, int(args.num_train_epochs), desc="Epoch", disable=args.local_rank not in [-1, 0]
     )
     set_seed(args)  # Added here for reproducibility
-    
+
     for _ in train_iterator:
-        
         ## Calculate kmeans results in the beginning of each epoch
         if args.negative_sampling_by_kmeans:
-            ToD_BERT_SYS_UTTR_KMEANS, KMEANS_to_SENTS = get_candidate_kmeans(args, cand_uttr_sys_dict, tokenizer, model)
-            trn_loader = get_loader(vars(args), "train", tokenizer, others["datasets"], others["unified_meta"], "train")
-        
+            ToD_BERT_SYS_UTTR_KMEANS, KMEANS_to_SENTS = get_candidate_kmeans(
+                args, cand_uttr_sys_dict, tokenizer, model
+            )
+            trn_loader = get_loader(
+                vars(args), "train", tokenizer, others["datasets"], others["unified_meta"], "train"
+            )
+
         loss_arr, loss_mlm_arr, loss_rs_arr = [], [], []
         epoch_iterator = tqdm(trn_loader, disable=args.local_rank not in [-1, 0])
         for step, batch in enumerate(epoch_iterator):
             model.train()
-            
+
             # Skip past any already trained steps if resuming training
             if steps_trained_in_current_epoch > 0:
                 steps_trained_in_current_epoch -= 1
                 continue
-            
+
             ## add response selection into pretraining
-            if args.add_rs_loss: 
-                kmeans_others = {"ToD_BERT_SYS_UTTR_KMEANS":ToD_BERT_SYS_UTTR_KMEANS, 
-                                 "KMEANS_to_SENTS":KMEANS_to_SENTS} if args.negative_sampling_by_kmeans else {}
-                
+            if args.add_rs_loss:
+                kmeans_others = (
+                    {"ToD_BERT_SYS_UTTR_KMEANS": ToD_BERT_SYS_UTTR_KMEANS, "KMEANS_to_SENTS": KMEANS_to_SENTS}
+                    if args.negative_sampling_by_kmeans
+                    else {}
+                )
+
                 ## Split dialogue into (context, response) pairs
-                input_cont, input_resp, resp_label = mask_for_response_selection(batch, 
-                                                                                 tokenizer, 
-                                                                                 args, 
-                                                                                 cand_uttr_sys_dict, 
-                                                                                 kmeans_others)
+                input_cont, input_resp, resp_label = mask_for_response_selection(
+                    batch, tokenizer, args, cand_uttr_sys_dict, kmeans_others
+                )
                 ## Mask context part for MLM loss
                 input_cont, labels = mask_tokens(input_cont, tokenizer, args) if args.mlm else (input_cont, input_cont)
-                
+
                 ## Allocate tensors to (gpu) devices
                 input_cont = input_cont.to(args.device)
                 input_resp = input_resp.to(args.device)
                 resp_label = resp_label.to(args.device)
                 labels = labels.to(args.device)
-                
+
                 ## Encode the context part with BERT
                 outputs = model.bert(
                     input_cont,
-                    attention_mask=input_cont>0,
+                    attention_mask=input_cont > 0,
                 )
                 sequence_output = outputs[0]
-                hid_cont = sequence_output[:, 0, :] ## CLS token
-                
+                hid_cont = sequence_output[:, 0, :]  ## CLS token
+
                 ## Calculate MLM loss for the context
                 prediction_scores = model.cls(sequence_output)
                 loss = xeloss(prediction_scores.view(-1, model.config.vocab_size), labels.view(-1))
                 loss_mlm = loss.item()
-                
+
                 ## Encode the response part with BERT
                 outputs = model.bert(
                     input_resp,
-                    attention_mask=input_resp>0,
+                    attention_mask=input_resp > 0,
                 )
                 sequence_output = outputs[0]
                 hid_resp = sequence_output[:, 0, :]
-                
+
                 ## Calculate RCL loss
                 scores = torch.matmul(hid_cont, hid_resp.transpose(1, 0))
                 loss_rs = xeloss(scores, resp_label)
                 loss += loss_rs
                 loss_rs = loss_rs.item()
-            
+
             ## with only MLM loss
-            else: 
+            else:
                 inputs = batch["context"].clone()
                 if args.mlm:
                     inputs, labels = mask_tokens(inputs, tokenizer, args)
                     inputs = inputs.to(args.device)
                     labels = labels.to(args.device)
-                    outputs = model(inputs, 
-                                    masked_lm_labels=labels,
-                                    attention_mask=inputs>0)
+                    outputs = model(inputs, masked_lm_labels=labels, attention_mask=inputs > 0)
                 else:
                     labels = inputs.clone()
-                    masked_indices = (labels == 0)
-                    labels[masked_indices] = -100 
+                    masked_indices = labels == 0
+                    labels[masked_indices] = -100
                     outputs = model(inputs, labels=labels)
                 loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
                 loss_mlm = loss.item()
@@ -473,18 +481,20 @@ def train(args, trn_loader, dev_loader, model, tokenizer, cand_uttr_sys_dict, ot
             loss_arr.append(loss.item())
             loss_mlm_arr.append(loss_mlm)
             loss_rs_arr.append(loss_rs)
-            
+
             if args.fp16:
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
                 loss.backward()
-            
+
             ## Print loss
-            epoch_iterator.set_description("Loss:{:.4f} MLM:{:.4f} RS:{:.4f}".format(np.mean(loss_arr), 
-                                                                                     np.mean(loss_mlm_arr), 
-                                                                                     np.mean(loss_rs_arr)))
-            
+            epoch_iterator.set_description(
+                "Loss:{:.4f} MLM:{:.4f} RS:{:.4f}".format(
+                    np.mean(loss_arr), np.mean(loss_mlm_arr), np.mean(loss_rs_arr)
+                )
+            )
+
             tr_loss += loss.item()
             if (step + 1) % args.gradient_accumulation_steps == 0:
                 if args.fp16:
@@ -502,27 +512,26 @@ def train(args, trn_loader, dev_loader, model, tokenizer, cand_uttr_sys_dict, ot
                     logging_loss = tr_loss
 
                 if args.local_rank in [-1, 0] and args.save_steps > 0 and global_step % args.save_steps == 0:
-                    
                     if args.evaluate_during_training and args.n_gpu == 1:
                         results = evaluate(args, model, dev_loader, tokenizer)
                         for key, value in results.items():
                             tb_writer.add_scalar("eval_{}".format(key), value, global_step)
                     else:
                         results = {}
-                        results["loss"] = best_loss - 0.1 # always saving
-                        
+                        results["loss"] = best_loss - 0.1  # always saving
+
                     if results["loss"] < best_loss:
                         patience = 0
                         best_loss = results["loss"]
-                        
+
                         checkpoint_prefix = "checkpoint"
                         # Save model checkpoint
                         output_dir = os.path.join(args.output_dir, "{}-{}".format(checkpoint_prefix, global_step))
                         if not os.path.exists(output_dir):
                             os.makedirs(output_dir)
                             model_to_save = (
-                            model.module if hasattr(model, "module") else model
-                        )  # Take care of distributed/parallel training
+                                model.module if hasattr(model, "module") else model
+                            )  # Take care of distributed/parallel training
                         model_to_save.save_pretrained(output_dir)
                         tokenizer.save_pretrained(output_dir)
 
@@ -541,11 +550,11 @@ def train(args, trn_loader, dev_loader, model, tokenizer, cand_uttr_sys_dict, ot
             if args.max_steps > 0 and global_step > args.max_steps:
                 epoch_iterator.close()
                 break
-            
+
             if patience > args.patience:
                 logger.info("Ran out of patience...")
                 break
-            
+
         if (args.max_steps > 0 and global_step > args.max_steps) or patience > args.patience:
             train_iterator.close()
             break
@@ -563,7 +572,7 @@ def evaluate(args, model, dev_loader, tokenizer, prefix=""):
         os.makedirs(eval_output_dir)
 
     eval_dataloader = dev_loader
-    
+
     # multi-gpu evaluate
     if args.n_gpu > 1:
         model = torch.nn.DataParallel(model)
@@ -577,25 +586,26 @@ def evaluate(args, model, dev_loader, tokenizer, prefix=""):
     model.eval()
 
     for batch in tqdm(eval_dataloader, desc="Evaluating"):
-        
         inputs = batch["context"].clone()
-        
-        #inputs, labels = mask_tokens(inputs, tokenizer, args) if args.mlm else (inputs, inputs)
+
+        # inputs, labels = mask_tokens(inputs, tokenizer, args) if args.mlm else (inputs, inputs)
         if args.mlm:
             inputs, labels = mask_tokens(inputs, tokenizer, args)
         else:
             labels = inputs.clone()
-            masked_indices = (labels == 0)
-            labels[masked_indices] = -100 
+            masked_indices = labels == 0
+            labels[masked_indices] = -100
 
         inputs = inputs.to(args.device)
         labels = labels.to(args.device)
 
         with torch.no_grad():
-            outputs = model(inputs, 
-                            masked_lm_labels=labels,
-                            attention_mask=inputs>0) if args.mlm else model(inputs, labels=labels)
-            
+            outputs = (
+                model(inputs, masked_lm_labels=labels, attention_mask=inputs > 0)
+                if args.mlm
+                else model(inputs, labels=labels)
+            )
+
             lm_loss = outputs[0]
             eval_loss += lm_loss.mean().item()
         nb_eval_steps += 1
@@ -603,7 +613,7 @@ def evaluate(args, model, dev_loader, tokenizer, prefix=""):
     eval_loss = eval_loss / nb_eval_steps
     perplexity = torch.exp(torch.tensor(eval_loss))
 
-    result = {"perplexity": perplexity, "loss":eval_loss}
+    result = {"perplexity": perplexity, "loss": eval_loss}
 
     output_eval_file = os.path.join(eval_output_dir, prefix, "eval_results.txt")
     with open(output_eval_file, "w") as writer:
@@ -736,92 +746,77 @@ def main():
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--server_ip", type=str, default="", help="For distant debugging.")
     parser.add_argument("--server_port", type=str, default="", help="For distant debugging.")
-    
+
     ## My add
     parser.add_argument(
-        '-dpath','--data_path', 
-        help='path to dataset folder', 
-        required=False, 
-        default='/export/home/dialog_datasets', 
-        type=str)
+        "-dpath",
+        "--data_path",
+        help="path to dataset folder",
+        required=False,
+        default="/export/home/dialog_datasets",
+        type=str,
+    )
     parser.add_argument(
-        '-ds','--dataset', 
-        help='which dataset to be used for training.',
-        required=False, 
-        default='["multiwoz", "camrest676", "woz", "smd", "frames", "msre2e", "taskmaster", "metalwoz", "schema"]', 
-        type=str)
+        "-ds",
+        "--dataset",
+        help="which dataset to be used for training.",
+        required=False,
+        default='["multiwoz", "camrest676", "woz", "smd", "frames", "msre2e", "taskmaster", "metalwoz", "schema"]',
+        type=str,
+    )
     parser.add_argument(
-        '-hds','--holdout_dataset', 
-        help='which dataset to be held out as dev and test set.',
-        required=False, 
-        default='["multiwoz"]', 
-        type=str)
+        "-hds",
+        "--holdout_dataset",
+        help="which dataset to be held out as dev and test set.",
+        required=False,
+        default='["multiwoz"]',
+        type=str,
+    )
     parser.add_argument(
-        '-task','--task', 
-        help='task in ["nlu", "dst", "dm", "nlg", "e2e"] to decide which dataloader to use', 
+        "-task",
+        "--task",
+        help='task in ["nlu", "dst", "dm", "nlg", "e2e"] to decide which dataloader to use',
         default="usdl",
-        required=False)
+        required=False,
+    )
     parser.add_argument(
-        '--usr_token', 
-        help='use to identify user utterance', 
-        required=False, 
-        default="[USR]", 
-        type=str)
+        "--usr_token", help="use to identify user utterance", required=False, default="[USR]", type=str
+    )
     parser.add_argument(
-        '--sys_token', 
-        help='use to identify system response', 
-        required=False, 
-        default="[SYS]", 
-        type=str)
-    parser.add_argument(
-        "--add_rs_loss",
-        action="store_true",
-        help="whether to add RCL loss during training") 
+        "--sys_token", help="use to identify system response", required=False, default="[SYS]", type=str
+    )
+    parser.add_argument("--add_rs_loss", action="store_true", help="whether to add RCL loss during training")
     parser.add_argument(
         "--nb_addition_negresponse_per_sample",
         default=0,
         type=int,
-        help="number of negative responses per sample added to the in-batch negative samples")
+        help="number of negative responses per sample added to the in-batch negative samples",
+    )
     parser.add_argument(
         "--negative_sampling_by_kmeans",
         action="store_true",
-        help="whether use kmeans to select negative samples or select randomly",) 
-    parser.add_argument(
-        "--nb_kmeans",
-        default=500,
-        type=int,
-        help="number of kmeans clusters")
-    parser.add_argument(
-        "--patience", 
-        type=int, 
-        default=15, 
-        help="waiting to earlystop")
-    
+        help="whether use kmeans to select negative samples or select randomly",
+    )
+    parser.add_argument("--nb_kmeans", default=500, type=int, help="number of kmeans clusters")
+    parser.add_argument("--patience", type=int, default=15, help="waiting to earlystop")
+
     ## data reading related setting (can be ignored here)
     parser.add_argument(
-        '--max_line', help='maximum line for reading data (for quick testing)', required=False, default=None, type=int)
+        "--max_line", help="maximum line for reading data (for quick testing)", required=False, default=None, type=int
+    )
     parser.add_argument(
-        '--example_type', help='type in ["turn", "dial"] for data reading',  required=False,  default="turn")
-    parser.add_argument(
-        "--train_data_ratio", default=1.0, type=float, help="")
-    parser.add_argument(
-        "--ratio_by_random", action="store_true", help="read data by random with a defined ratio")  
-    parser.add_argument(
-        "--domain_act", action="store_true", help="use domain_act for mwoz")  
-    parser.add_argument(
-        '-task_name', '--task_name', help='', required=False, default="") 
-    parser.add_argument(
-        "--only_last_turn", action="store_true", help="")  
-    parser.add_argument(
-        "--oracle_domain", action="store_true", help="") 
-    parser.add_argument(
-        "--ontology_version", default="", type=str, help="['', '1.0']")
-    parser.add_argument(
-        "--dstlm", action="store_true", help="") 
-    parser.add_argument(
-        "--max_seq_length", default=512, type=int, help="")
-    parser.add_argument(
-        "--nb_shots", default=-1, type=int, help="")
+        "--example_type", help='type in ["turn", "dial"] for data reading', required=False, default="turn"
+    )
+    parser.add_argument("--train_data_ratio", default=1.0, type=float, help="")
+    parser.add_argument("--ratio_by_random", action="store_true", help="read data by random with a defined ratio")
+    parser.add_argument("--domain_act", action="store_true", help="use domain_act for mwoz")
+    parser.add_argument("-task_name", "--task_name", help="", required=False, default="")
+    parser.add_argument("--only_last_turn", action="store_true", help="")
+    parser.add_argument("--oracle_domain", action="store_true", help="")
+    parser.add_argument("--ontology_version", default="", type=str, help="['', '1.0']")
+    parser.add_argument("--dstlm", action="store_true", help="")
+    parser.add_argument("--max_seq_length", default=512, type=int, help="")
+    parser.add_argument("--nb_shots", default=-1, type=int, help="")
 
     args = parser.parse_args()
     args_dict = vars(args)
@@ -831,7 +826,7 @@ def main():
             "BERT and RoBERTa do not have LM heads but masked LM heads. They must be run using the --mlm "
             "flag (masked language modeling)."
         )
-    #if args.eval_data_file is None and args.do_eval:
+    # if args.eval_data_file is None and args.do_eval:
     #    raise ValueError(
     #        "Cannot do evaluation without an evaluation data file. Either supply a file to --eval_data_file "
     #        "or remove the --do_eval argument."
@@ -896,14 +891,14 @@ def main():
         args.config_name if args.config_name else args.model_name_or_path,
         cache_dir=args.cache_dir if args.cache_dir else None,
     )
-    #config.output_hidden_states = True
-    
+    # config.output_hidden_states = True
+
     tokenizer = tokenizer_class.from_pretrained(
         args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
         do_lower_case=args.do_lower_case,
         cache_dir=args.cache_dir if args.cache_dir else None,
     )
-    
+
     if args.block_size <= 0:
         args.block_size = (
             tokenizer.max_len_single_sentence
@@ -916,7 +911,7 @@ def main():
         cache_dir=args.cache_dir if args.cache_dir else None,
     )
     model.to(args.device)
-    
+
     # Add new tokens to the vocabulary and embeddings of our model
     tokenizer.add_tokens([args.sys_token, args.usr_token])
     model.resize_token_embeddings(len(tokenizer))
@@ -928,11 +923,10 @@ def main():
 
     # Training
     if args.do_train:
-        
-        # Barrier to make sure only the first process in distributed training process the dataset, 
+        # Barrier to make sure only the first process in distributed training process the dataset,
         # and the others will use the cache
         if args.local_rank not in [-1, 0]:
-            torch.distributed.barrier()  
+            torch.distributed.barrier()
 
         ## Read datasets and create global set of candidate responses
         datasets = {}
@@ -941,28 +935,28 @@ def main():
             data_trn, data_dev, data_tst, data_meta = globals()["prepare_data_{}".format(ds_name)](args_dict)
             # held-out mwoz for now
             if ds_name in ast.literal_eval(args.holdout_dataset):
-                datasets[ds_name] = {"train": data_trn, "dev":data_dev, "test": data_tst, "meta":data_meta}
+                datasets[ds_name] = {"train": data_trn, "dev": data_dev, "test": data_tst, "meta": data_meta}
             else:
-                datasets[ds_name] = {"train": data_trn + data_dev + data_tst, "dev":[], "test": [], "meta":data_meta}
+                datasets[ds_name] = {"train": data_trn + data_dev + data_tst, "dev": [], "test": [], "meta": data_meta}
 
             for d in datasets[ds_name]["train"]:
                 cand_uttr_sys.add(d["turn_sys"])
-                cand_uttr_sys.update(set([sent for si, sent in enumerate(d["dialog_history"]) if si%2==0]))
-        unified_meta = get_unified_meta(datasets)  
+                cand_uttr_sys.update(set([sent for si, sent in enumerate(d["dialog_history"]) if si % 2 == 0]))
+        unified_meta = get_unified_meta(datasets)
 
         ## process candidate responses
         if args.nb_addition_negresponse_per_sample > 0:
             cand_uttr_sys = list(cand_uttr_sys)
-            cand_uttr_sys = [s.lower() for s in cand_uttr_sys if len(s.split(" ")) <= 100] # remove too long responses
+            cand_uttr_sys = [s.lower() for s in cand_uttr_sys if len(s.split(" ")) <= 100]  # remove too long responses
             cand_uttr_sys_tokens = []
             for cand in tqdm(cand_uttr_sys):
                 cand_ids = tokenizer.tokenize("[CLS] [SYS]") + tokenizer.tokenize(cand)
                 cand_ids = torch.tensor(tokenizer.convert_tokens_to_ids(cand_ids))
                 cand_uttr_sys_tokens.append(cand_ids)
-            cand_uttr_sys_dict = {a:b for a, b in zip(cand_uttr_sys, cand_uttr_sys_tokens)}
+            cand_uttr_sys_dict = {a: b for a, b in zip(cand_uttr_sys, cand_uttr_sys_tokens)}
         else:
             cand_uttr_sys_dict = {}
-        
+
         ## batch size
         args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
         args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
@@ -971,14 +965,14 @@ def main():
 
         ## Create Dataloader
         trn_loader = get_loader(args_dict, "train", tokenizer, datasets, unified_meta, "train")
-        dev_loader = get_loader(args_dict, "dev"  , tokenizer, datasets, unified_meta, "dev")
-        
+        dev_loader = get_loader(args_dict, "dev", tokenizer, datasets, unified_meta, "dev")
+
         ## additional information for negative sampling
         others = {}
         if args.negative_sampling_by_kmeans:
             others["datasets"] = datasets
             others["unified_meta"] = unified_meta
-        
+
         if args.local_rank == 0:
             torch.distributed.barrier()
 
@@ -1002,7 +996,7 @@ def main():
             result = evaluate(args, model, dev_loader, tokenizer, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
             results.update(result)
-    
+
     print(results)
 
 

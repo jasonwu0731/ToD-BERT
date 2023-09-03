@@ -12,29 +12,33 @@ import numpy as np
 
 from six.moves import urllib
 
+
 def word_error_rate(r, h):
     """
     This is a function that calculate the word error rate in ASR.
-    You can use it like this: wer("what is it".split(), "what is".split()) 
+    You can use it like this: wer("what is it".split(), "what is".split())
     """
-    #build the matrix
-    d = numpy.zeros((len(r)+1)*(len(h)+1), dtype=numpy.uint8).reshape((len(r)+1, len(h)+1))
-    for i in range(len(r)+1):
-        for j in range(len(h)+1):
-            if i == 0: d[0][j] = j
-            elif j == 0: d[i][0] = i
-    for i in range(1,len(r)+1):
-        for j in range(1, len(h)+1):
-            if r[i-1] == h[j-1]:
-                d[i][j] = d[i-1][j-1]
+    # build the matrix
+    d = numpy.zeros((len(r) + 1) * (len(h) + 1), dtype=numpy.uint8).reshape((len(r) + 1, len(h) + 1))
+    for i in range(len(r) + 1):
+        for j in range(len(h) + 1):
+            if i == 0:
+                d[0][j] = j
+            elif j == 0:
+                d[i][0] = i
+    for i in range(1, len(r) + 1):
+        for j in range(1, len(h) + 1):
+            if r[i - 1] == h[j - 1]:
+                d[i][j] = d[i - 1][j - 1]
             else:
-                substitute = d[i-1][j-1] + 1
-                insert = d[i][j-1] + 1
-                delete = d[i-1][j] + 1
+                substitute = d[i - 1][j - 1] + 1
+                insert = d[i][j - 1] + 1
+                delete = d[i - 1][j] + 1
                 d[i][j] = min(substitute, insert, delete)
     result = float(d[len(r)][len(h)]) / len(r) * 100
     # result = str("%.2f" % result) + "%"
     return result
+
 
 # -*- coding: utf-8 -*-
 # Copyright 2017 Google Inc.
@@ -68,19 +72,17 @@ def moses_multi_bleu(hypotheses, references, lowercase=False):
     if np.size(hypotheses) == 0:
         return np.float32(0.0)
 
-    
     # Get MOSES multi-bleu script
     try:
         multi_bleu_path, _ = urllib.request.urlretrieve(
-            "https://raw.githubusercontent.com/moses-smt/mosesdecoder/"
-            "master/scripts/generic/multi-bleu.perl")
+            "https://raw.githubusercontent.com/moses-smt/mosesdecoder/" "master/scripts/generic/multi-bleu.perl"
+        )
         os.chmod(multi_bleu_path, 0o755)
-    except: #pylint: disable=W0702
+    except:  # pylint: disable=W0702
         print("Unable to fetch multi-bleu.perl script, using local.")
         metrics_dir = os.path.dirname(os.path.realpath(__file__))
         bin_dir = os.path.abspath(os.path.join(metrics_dir, "..", "..", "bin"))
         multi_bleu_path = os.path.join(bin_dir, "tools/multi-bleu.perl")
-
 
     # Dump hypotheses and references to tempfiles
     hypothesis_file = tempfile.NamedTemporaryFile()
@@ -92,8 +94,7 @@ def moses_multi_bleu(hypotheses, references, lowercase=False):
     reference_file.write(b"\n")
     reference_file.flush()
 
-
-     # Calculate BLEU using multi-bleu script
+    # Calculate BLEU using multi-bleu script
     with open(hypothesis_file.name, "r") as read_pred:
         bleu_cmd = [multi_bleu_path]
         if lowercase:
